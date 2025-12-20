@@ -27,12 +27,17 @@ export default function VerifyAge() {
 
         const pollInterval = setInterval(async () => {
             try {
-                // In a real app, this would check webhook or long-polling endpoint
-                // For demo, we'll navigate to verified page after timeout
-                // The proof request would have a callback_url that receives webhook
+                if (!proofRequest?.proof_request_id) return;
 
-                // For now, let user manually proceed after scanning
-                // In production, the webhook would trigger navigation
+                // Poll the backend for status updates
+                const res = await api.get(`/proof-requests/${proofRequest.proof_request_id}`);
+
+                if (res.data.status === 'approved') {
+                    console.log('Proof approved!');
+                    clearInterval(pollInterval);
+                    setProofData(res.data); // Store result if needed
+                    navigate('/mock-verifier/verified', { state: { verified: true } });
+                }
             } catch (err) {
                 console.error('Poll error:', err);
             }
@@ -41,13 +46,11 @@ export default function VerifyAge() {
         // Store interval ref for cleanup
         window.pollInterval = pollInterval;
 
-        // Auto-navigate after 30 seconds for demo purposes
+        // Stop polling after 2 minutes (timeout)
         setTimeout(() => {
-            if (!proofData) {
-                clearInterval(pollInterval);
-                // navigate('/mock-verifier/verified');
-            }
-        }, 30000);
+            clearInterval(pollInterval);
+            if (polling) setPolling(false);
+        }, 120000);
     };
 
     const requestProof = async () => {
