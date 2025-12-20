@@ -27,7 +27,7 @@ verifiers_data = [
     {
         "company_name": "AlcoholDelivery.com",
         "domain": "alcoholdelivery.com",
-        "api_key": crypto_utils.generate_api_key()
+        "api_key": "pk_4cZLBbGW4jAcbNBNw5KmTG1R4Bx49kFoTjFDizaRZEA"
     },
     {
         "company_name": "OnlineCasino.io",
@@ -52,24 +52,28 @@ for v_data in verifiers_data:
 # Create mock users
 users_data = [
     {
+        "user_id": "usr_demo_adult",
         "email": "john@example.com",
         "password": "password123",
         "name": "John Doe",
         "dob": date(1990, 5, 15)  # 34 years old - passes 18+ and 21+
     },
     {
+        "user_id": "usr_demo_teen",
         "email": "jane@example.com",
         "password": "password123",
         "name": "Jane Smith",
         "dob": date(2010, 8, 20)  # 14 years old - fails both
     },
     {
+        "user_id": "usr_demo_young_adult",
         "email": "bob@example.com",
         "password": "password123",
         "name": "Bob Johnson",
         "dob": date(2004, 3, 10)  # 20 years old - passes 18+ but fails 21+
     },
     {
+        "user_id": "usr_demo_senior",
         "email": "alice@example.com",
         "password": "password123",
         "name": "Alice Williams",
@@ -81,6 +85,7 @@ for u_data in users_data:
     existing = db.query(models.MockUser).filter_by(email=u_data["email"]).first()
     if not existing:
         user = models.MockUser(
+            user_id=u_data["user_id"],
             email=u_data["email"],
             password_hash=auth.hash_password(u_data["password"]),
             name=u_data["name"],
@@ -88,7 +93,7 @@ for u_data in users_data:
         )
         db.add(user)
         age = (date.today() - u_data["dob"]).days // 365
-        print(f"✓ Created user: {u_data['email']} (age {age})")
+        print(f"✓ Created user: {u_data['email']} (ID: {u_data['user_id']}, Age: {age})")
 
 db.commit()
 

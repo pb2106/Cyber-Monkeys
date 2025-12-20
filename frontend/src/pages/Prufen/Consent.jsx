@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { ShieldCheck, CheckCircle2, XCircle, Clock, Trash2, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
 import api from '../../services/api';
 
 export default function Consent() {
@@ -77,14 +78,16 @@ export default function Consent() {
 
     if (error && !request) {
         return (
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 text-center">
-                    <div className="text-6xl mb-4">❌</div>
-                    <h1 className="text-2xl font-bold mb-2">Request Not Found</h1>
-                    <p className="text-gray-600 mb-6">{error}</p>
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-8 text-center border border-slate-100">
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <XCircle className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h1 className="text-xl font-bold text-slate-900 mb-2">Request Not Found</h1>
+                    <p className="text-slate-500 mb-8">{error}</p>
                     <button
                         onClick={() => navigate('/')}
-                        className="bg-purple-600 text-white px-6 py-2 rounded-lg"
+                        className="bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors"
                     >
                         Return Home
                     </button>
@@ -95,119 +98,123 @@ export default function Consent() {
 
     if (!request) {
         return (
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-600 border-t-transparent"></div>
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-slate-900"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full overflow-hidden">
                 {/* Header */}
-                <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-purple-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                        <span className="text-3xl">🔒</span>
+                <div className="p-6 border-b border-slate-100">
+                    <div className="flex items-center justify-between mb-6">
+                        <button onClick={() => navigate('/')} className="text-slate-400 hover:text-slate-600">
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                        <div className="flex items-center text-slate-900 font-bold">
+                            <ShieldCheck className="w-5 h-5 mr-2 text-slate-900" />
+                            Prüfen
+                        </div>
+                        <div className="w-5"></div> {/* Spacer */}
                     </div>
-                    <h1 className="text-2xl font-bold">Verification Request</h1>
-                    <p className="text-gray-500 text-sm mt-1">Review before approving</p>
-                </div>
 
-                {/* Verifier Info */}
-                <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-6">
-                    <p className="text-xs text-blue-600 font-semibold mb-1">REQUESTED BY</p>
-                    <p className="font-bold text-blue-900">{request.verifier?.name || request.verifier_name}</p>
-                    <p className="text-sm text-blue-700 mt-1">{request.verifier?.domain || request.verifier_domain}</p>
-                </div>
-
-                {/* Claim Display */}
-                <div className="mb-6 text-center">
-                    <p className="text-lg font-semibold text-gray-700 mb-2">They want to verify:</p>
-                    <p className="text-2xl font-bold text-purple-900">
-                        {request.claim?.display || request.claim_display}
-                    </p>
-                </div>
-
-                {/* Privacy Disclosure - THE CORE VALUE PROP */}
-                <div className="border-2 border-purple-200 bg-purple-50 rounded-xl p-4 mb-6">
-                    <div className="mb-4">
-                        <p className="text-sm font-bold text-green-700 mb-2 flex items-center">
-                            <span className="mr-2">✅</span>
-                            They WILL receive:
+                    <div className="text-center">
+                        <h1 className="text-xl font-bold text-slate-900 mb-1">Verification Request</h1>
+                        <p className="text-sm text-slate-500">
+                            <span className="font-semibold text-slate-900">{request.verifier?.name || request.verifier_name}</span> is requesting proof.
                         </p>
-                        <div className="ml-6">
-                            <p className="text-sm font-semibold">• YES or NO only</p>
-                            <p className="text-xs text-gray-600">No personal information</p>
+                    </div>
+                </div>
+
+                <div className="p-6">
+                    {/* Claim Display */}
+                    <div className="bg-slate-50 rounded-xl p-6 text-center mb-6 border border-slate-100">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">They want to verify</p>
+                        <p className="text-lg font-medium text-slate-900">
+                            {request.claim?.display || request.claim_display}
+                        </p>
+                    </div>
+
+                    {/* Privacy Disclosure - THE CORE VALUE PROP */}
+                    <div className="space-y-4 mb-8">
+                        {/* What they get */}
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 mt-0.5">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-semibold text-slate-900">They will receive</p>
+                                <p className="text-xs text-slate-500 mt-0.5">A simple YES or NO confirmation only.</p>
+                            </div>
+                        </div>
+
+                        {/* What they don't get */}
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 mt-0.5">
+                                <XCircle className="w-5 h-5 text-slate-300" />
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-semibold text-slate-900">They will NOT see</p>
+                                <p className="text-xs text-slate-500 mt-0.5">Your date of birth, name, ID number, or address.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div>
-                        <p className="text-sm font-bold text-red-700 mb-2 flex items-center">
-                            <span className="mr-2">🚫</span>
-                            They will NOT see:
-                        </p>
-                        <div className="ml-6 space-y-1">
-                            <p className="text-sm line-through text-gray-500">Your date of birth</p>
-                            <p className="text-sm line-through text-gray-500">Your name</p>
-                            <p className="text-sm line-through text-gray-500">Your ID number</p>
-                            <p className="text-sm line-through text-gray-500">Your address</p>
+                    {/* Meta Info */}
+                    <div className="grid grid-cols-3 gap-2 mb-8">
+                        <div className="flex flex-col items-center text-center p-2">
+                            <Clock className="w-4 h-4 text-slate-400 mb-1" />
+                            <span className="text-[10px] text-slate-500">Expires in 5m</span>
+                        </div>
+                        <div className="flex flex-col items-center text-center p-2">
+                            <Trash2 className="w-4 h-4 text-slate-400 mb-1" />
+                            <span className="text-[10px] text-slate-500">Deleted after use</span>
+                        </div>
+                        <div className="flex flex-col items-center text-center p-2">
+                            <Lock className="w-4 h-4 text-slate-400 mb-1" />
+                            <span className="text-[10px] text-slate-500">Single verifier</span>
                         </div>
                     </div>
-                </div>
 
-                {/* Privacy Guarantees */}
-                <div className="grid grid-cols-3 gap-2 mb-6">
-                    <div className="bg-purple-50 border border-purple-200 p-3 rounded-lg text-center">
-                        <p className="text-lg mb-1">⏱️</p>
-                        <p className="text-xs font-semibold text-purple-900">5 min</p>
-                        <p className="text-xs text-purple-600">validity</p>
-                    </div>
-                    <div className="bg-purple-50 border border-purple-200 p-3 rounded-lg text-center">
-                        <p className="text-lg mb-1">🗑️</p>
-                        <p className="text-xs font-semibold text-purple-900">Deleted</p>
-                        <p className="text-xs text-purple-600">after use</p>
-                    </div>
-                    <div className="bg-purple-50 border border-purple-200 p-3 rounded-lg text-center">
-                        <p className="text-lg mb-1">🔒</p>
-                        <p className="text-xs font-semibold text-purple-900">Single</p>
-                        <p className="text-xs text-purple-600">verifier</p>
-                    </div>
-                </div>
-
-                {/* Error Display */}
-                {error && (
-                    <div className="mb-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm">
-                        {error}
-                    </div>
-                )}
-
-                {/* Actions */}
-                <button
-                    onClick={handleApprove}
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-4 rounded-xl font-bold mb-3 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all shadow-lg"
-                >
-                    {loading ? (
-                        <span className="flex items-center justify-center">
-                            <span className="animate-spin mr-2">⚙️</span>
-                            Generating Proof...
-                        </span>
-                    ) : (
-                        'Approve Verification'
+                    {/* Error Display */}
+                    {error && (
+                        <div className="mb-6 bg-red-50 border border-red-100 text-red-600 p-3 rounded-lg text-sm flex items-center">
+                            <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
+                            {error}
+                        </div>
                     )}
-                </button>
 
-                <button
-                    onClick={() => navigate('/')}
-                    className="w-full text-gray-600 hover:text-gray-800 p-2 font-semibold"
-                >
-                    Decline
-                </button>
+                    {/* Actions */}
+                    <button
+                        onClick={handleApprove}
+                        disabled={loading}
+                        className="w-full bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-xl font-bold mb-3 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-md active:scale-[0.98]"
+                    >
+                        {loading ? (
+                            <span className="flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                                Generating Proof...
+                            </span>
+                        ) : (
+                            'Approve Verification'
+                        )}
+                    </button>
 
-                {/* Privacy Footer */}
-                <div className="mt-6 pt-4 border-t border-gray-200 text-center">
-                    <p className="text-xs text-gray-500">
-                        🔐 Your data is processed in memory and <strong>never stored</strong>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="w-full text-slate-500 hover:text-slate-700 p-3 font-medium text-sm transition-colors"
+                    >
+                        Decline Request
+                    </button>
+                </div>
+
+                {/* Footer */}
+                <div className="bg-slate-50 p-4 text-center border-t border-slate-100">
+                    <p className="text-[10px] text-slate-400 flex items-center justify-center">
+                        <Lock className="w-3 h-3 mr-1" />
+                        Zero-Knowledge Proof Protocol
                     </p>
                 </div>
             </div>

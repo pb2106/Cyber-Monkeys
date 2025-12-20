@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { ShieldCheck, QrCode, Upload, Zap, Lock, CheckCircle2 } from 'lucide-react';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -39,77 +40,85 @@ export default function Home() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-blue-600 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-                {/* Logo */}
-                <div className="mb-6">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full mx-auto flex items-center justify-center shadow-lg">
-                        <span className="text-4xl">🔒</span>
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+            <div className="max-w-md w-full">
+                {/* Brand Header */}
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-900 rounded-2xl shadow-lg mb-6">
+                        <ShieldCheck className="w-8 h-8 text-white" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">
+                        Prüfen
+                    </h1>
+                    <p className="text-slate-500 font-medium">
+                        Privacy-Preserving Verification
+                    </p>
+                </div>
+
+                {/* Main Card */}
+                <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                    <div className="p-8">
+                        <div className="text-center mb-8">
+                            <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                                Verify Your Identity
+                            </h2>
+                            <p className="text-sm text-slate-500 leading-relaxed">
+                                Prove your eligibility without sharing sensitive personal data like your date of birth.
+                            </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="space-y-4">
+                            <button
+                                onClick={() => navigate('/scan')}
+                                className="w-full bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-xl font-semibold flex items-center justify-center shadow-md transition-all active:scale-[0.98] group"
+                            >
+                                <QrCode className="w-5 h-5 mr-3 text-slate-300 group-hover:text-white transition-colors" />
+                                Scan QR Code
+                            </button>
+
+                            <button
+                                onClick={() => document.getElementById('qr-upload').click()}
+                                disabled={uploading}
+                                className="w-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 p-4 rounded-xl font-semibold flex items-center justify-center transition-all active:scale-[0.98]"
+                            >
+                                <Upload className="w-5 h-5 mr-3 text-slate-400" />
+                                {uploading ? 'Processing...' : 'Upload QR Image'}
+                            </button>
+
+                            <input
+                                id="qr-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleUpload}
+                            />
+                            <div id="qr-reader-upload" className="hidden"></div>
+                        </div>
+                    </div>
+
+                    {/* Features Grid */}
+                    <div className="bg-slate-50 p-6 border-t border-slate-100 grid grid-cols-2 gap-4">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
+                                <Lock className="w-4 h-4 text-emerald-600" />
+                            </div>
+                            <span className="text-xs font-semibold text-slate-900">Zero Knowledge</span>
+                            <span className="text-[10px] text-slate-500 mt-0.5">No data shared</span>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                                <Zap className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <span className="text-xs font-semibold text-slate-900">Instant</span>
+                            <span className="text-[10px] text-slate-500 mt-0.5">Under 2 seconds</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Title */}
-                <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                    Prüfen
-                </h1>
-
-                {/* Tagline */}
-                <p className="text-gray-600 mb-2 text-lg">
-                    Privacy-Preserving Verification
-                </p>
-
-                <p className="text-gray-500 mb-8 text-sm">
-                    Prove you're 18+ without sharing your date of birth
-                </p>
-
-                {/* Actions */}
-                <div className="space-y-4">
-                    <button
-                        onClick={() => navigate('/scan')}
-                        className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-4 rounded-xl font-semibold flex items-center justify-center shadow-lg transform hover:scale-105 transition-all"
-                    >
-                        <span className="mr-2 text-2xl">📷</span>
-                        Scan QR Code
-                    </button>
-
-                    <button
-                        onClick={() => document.getElementById('qr-upload').click()}
-                        disabled={uploading}
-                        className="w-full bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 p-4 rounded-xl font-semibold flex items-center justify-center transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <span className="mr-2 text-2xl">📤</span>
-                        {uploading ? 'Processing...' : 'Upload QR Image'}
-                    </button>
-
-                    <input
-                        id="qr-upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleUpload}
-                    />
-
-                    {/* Hidden div for QR upload processing */}
-                    <div id="qr-reader-upload" className="hidden"></div>
-                </div>
-
-                {/* Privacy Badges */}
-                <div className="mt-8 grid grid-cols-2 gap-4 text-xs">
-                    <div className="bg-purple-50 p-3 rounded-lg">
-                        <div className="text-2xl mb-1">🔐</div>
-                        <div className="font-semibold text-purple-900">Zero Knowledge</div>
-                        <div className="text-purple-600">No data shared</div>
-                    </div>
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                        <div className="text-2xl mb-1">⚡</div>
-                        <div className="font-semibold text-blue-900">Instant</div>
-                        <div className="text-blue-600">Under 2 seconds</div>
-                    </div>
-                </div>
-
-                {/* Disclaimer */}
-                <p className="mt-6 text-xs text-gray-400">
-                    Your personal data is never stored. Only YES/NO proofs.
+                {/* Footer */}
+                <p className="mt-8 text-center text-xs text-slate-400">
+                    Secure • Anonymous • Ephemeral
                 </p>
             </div>
         </div>

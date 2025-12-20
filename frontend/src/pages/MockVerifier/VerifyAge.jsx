@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
+import { ShieldCheck, AlertTriangle, Smartphone, Loader2, ArrowRight, Lock } from 'lucide-react';
 import api from '../../services/api';
 
 export default function VerifyAge() {
@@ -64,15 +65,11 @@ export default function VerifyAge() {
                 'Authorization': `Bearer ${VERIFIER_API_KEY}`
             };
 
-            console.log('Request headers:', headers);
-
             const body = {
                 condition: 'age_over_18',
                 expires_in: 300,
                 callback_url: `${window.location.origin}/api/webhooks/proof-received`
             };
-
-            console.log('Request body:', body);
 
             // Make the API call directly with fetch
             // IMPORTANT: Include trailing slash to match FastAPI route and avoid 307 redirect
@@ -81,9 +78,6 @@ export default function VerifyAge() {
                 headers: headers,
                 body: JSON.stringify(body)
             });
-
-            console.log('Response status:', res.status);
-            console.log('Response headers:', Object.fromEntries(res.headers.entries()));
 
             if (!res.ok) {
                 const errorData = await res.json();
@@ -113,129 +107,138 @@ export default function VerifyAge() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 to-orange-50 p-4">
-            <div className="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full">
+        <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 font-sans">
+            <div className="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full border border-slate-200">
                 {/* Header */}
-                <div className="text-center mb-6">
-                    <div className="text-5xl mb-2">🍺</div>
-                    <h1 className="text-2xl font-bold text-orange-800 mb-1">
-                        Welcome, {userName}!
+                <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-amber-100 rounded-full mb-4">
+                        <span className="text-2xl">🍺</span>
+                    </div>
+                    <h1 className="text-2xl font-bold text-slate-900 mb-1">
+                        AlcoholDelivery.com
                     </h1>
-                    <p className="text-orange-600 text-sm">Let's get you verified</p>
+                    <p className="text-slate-500 text-sm">Welcome back, {userName}</p>
                 </div>
 
                 {/* Age Gate Message */}
-                <div className="bg-orange-50 border-2 border-orange-300 p-5 rounded-xl mb-6">
-                    <div className="flex items-center mb-3">
-                        <span className="text-3xl mr-3">⚠️</span>
-                        <h2 className="text-lg font-bold text-orange-900">Age Verification Required</h2>
+                <div className="bg-amber-50 border border-amber-200 p-5 rounded-lg mb-8">
+                    <div className="flex items-start">
+                        <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" />
+                        <div>
+                            <h2 className="text-sm font-bold text-amber-900 mb-1">Age Verification Required</h2>
+                            <p className="text-sm text-amber-800 leading-relaxed">
+                                You must be <strong>18 or older</strong> to purchase alcohol. Please verify your age to continue.
+                            </p>
+                        </div>
                     </div>
-                    <p className="text-orange-800">
-                        You must be <strong>18 or older</strong> to access AlcoholDelivery.com
-                    </p>
                 </div>
 
                 {!proofRequest ? (
                     /* Initial state - show verify button */
                     <>
-                        <div className="mb-6 text-center text-gray-600 text-sm">
-                            <p className="mb-4">We use <strong>Prüfen</strong> for privacy-preserving age verification.</p>
-                            <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
-                                <p className="font-semibold text-purple-900 mb-2">🔒 Your Privacy is Protected</p>
-                                <ul className="text-xs text-purple-800 text-left space-y-1">
-                                    <li>• We only receive YES or NO</li>
-                                    <li>• We  don't see your date of birth</li>
-                                    <li>• We don't see your ID or name</li>
-                                    <li>• Proof expires in 5 minutes</li>
+                        <div className="mb-8">
+                            <div className="bg-slate-50 border border-slate-100 p-4 rounded-lg mb-6">
+                                <div className="flex items-center mb-3">
+                                    <ShieldCheck className="w-4 h-4 text-slate-900 mr-2" />
+                                    <span className="text-sm font-semibold text-slate-900">Secure Verification via Prüfen</span>
+                                </div>
+                                <ul className="space-y-2">
+                                    <li className="flex items-center text-xs text-slate-600">
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></div>
+                                        We only receive a YES/NO confirmation
+                                    </li>
+                                    <li className="flex items-center text-xs text-slate-600">
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></div>
+                                        Your date of birth remains private
+                                    </li>
+                                    <li className="flex items-center text-xs text-slate-600">
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></div>
+                                        No ID photos are stored
+                                    </li>
                                 </ul>
                             </div>
-                        </div>
 
-                        <button
-                            onClick={requestProof}
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-4 rounded-xl font-bold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105 transition-all"
-                        >
-                            <span className="mr-2 text-xl">🔒</span>
-                            {loading ? 'Loading...' : 'Verify with Prüfen'}
-                        </button>
+                            <button
+                                onClick={requestProof}
+                                disabled={loading}
+                                className="w-full bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-lg font-semibold flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-md active:scale-[0.98]"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                        Connecting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Lock className="w-5 h-5 mr-2" />
+                                        Verify with Prüfen
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </>
                 ) : (
                     /* QR Code Display */
-                    <div className="text-center">
-                        <p className="mb-4 font-semibold text-gray-700">
-                            Scan this QR code with the Prüfen app:
+                    <div className="text-center animate-fadeIn">
+                        <p className="mb-6 font-medium text-slate-700">
+                            Scan with the Prüfen app to verify:
                         </p>
 
                         {/* QR Code */}
-                        <div className="bg-white p-6 rounded-xl border-4 border-purple-600 inline-block mb-4">
+                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-inner inline-block mb-6">
                             <QRCodeSVG
                                 value={JSON.stringify(proofRequest)}
-                                size={280}
+                                size={240}
                                 level="H"
                                 includeMargin={true}
                             />
                         </div>
 
-                        {/* Request Details */}
-                        <div className="bg-gray-50 border border-gray-200 p-3 rounded-lg mb-4 text-xs text-left">
-                            <p className="font-semibold mb-1">Request Details:</p>
-                            <p><strong>Request ID:</strong> {proofRequest.proof_request_id.substring(0, 12)}...</p>
-                            <p><strong>Claim:</strong> {proofRequest.claim.display}</p>
-                            <p><strong>Expires:</strong> {new Date(proofRequest.expires_at).toLocaleTimeString()}</p>
-                        </div>
-
                         {/* Instructions */}
-                        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4 text-sm text-left">
-                            <p className="font-semibold mb-2">📱 How to scan:</p>
-                            <ol className="space-y-1 ml-4 list-decimal text-gray-700">
-                                <li>Open Prüfen app (or go to <code className="bg-blue-100 px-1 rounded">localhost:5173</code> in new tab)</li>
-                                <li>Click "Scan QR Code" or "Upload QR Image"</li>
-                                <li>Review the verification request</li>
-                                <li>Approve to complete verification</li>
+                        <div className="bg-slate-50 border border-slate-100 p-4 rounded-lg mb-6 text-left">
+                            <div className="flex items-center mb-3">
+                                <Smartphone className="w-4 h-4 text-slate-500 mr-2" />
+                                <span className="text-xs font-semibold text-slate-700">How to scan</span>
+                            </div>
+                            <ol className="space-y-2 ml-6 list-decimal text-xs text-slate-600">
+                                <li>Open <strong>Prüfen app</strong> on your phone</li>
+                                <li>Tap <strong>Scan QR Code</strong></li>
+                                <li>Approve the request</li>
                             </ol>
                         </div>
 
                         {/* Demo Helper */}
-                        <div className="bg-yellow-50 border border-yellow-300 p-4 rounded-lg mb-4">
-                            <p className="text-sm text-yellow-800 mb-2">
-                                <strong>Demo Mode:</strong> For local testing without mobile camera:
+                        <div className="bg-amber-50 border border-amber-100 p-3 rounded-lg mb-6 text-left">
+                            <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1">
+                                Demo Mode
                             </p>
-                            <ol className="text-xs text-yellow-700 space-y-1 ml-4 list-decimal">
-                                <li>Right-click QR code → "Save image"</li>
-                                <li>Open <a href="/" target="_blank" className="underline font-semibold">Prüfen app</a> in new tab</li>
-                                <li>Click "Upload QR Image" and select saved image</li>
-                            </ol>
+                            <p className="text-xs text-amber-700">
+                                Right-click QR to save image, then upload in Prüfen app tab.
+                            </p>
                         </div>
 
                         {/* Status */}
-                        <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
-                            <span className="animate-spin mr-2">⚙️</span>
+                        <div className="flex items-center justify-center text-sm text-slate-500 mb-6">
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin text-slate-400" />
                             <span>Waiting for verification...</span>
                         </div>
-
-                        {/* Expiration */}
-                        <p className="text-xs text-gray-400 mb-4">
-                            Expires in 5 minutes
-                        </p>
 
                         {/* Manual Continue (for demo) */}
                         <button
                             onClick={handleManualVerified}
-                            className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 p-3 rounded-lg font-semibold text-sm"
+                            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 p-3 rounded-lg font-medium text-sm flex items-center justify-center transition-colors"
                         >
-                            [Demo: Skip to Verified Page]
+                            Skip to Verified Page
+                            <ArrowRight className="w-4 h-4 ml-2" />
                         </button>
                     </div>
                 )}
 
-                {/* Powered by Prüfen */}
-                <div className="mt-6 pt-4 border-t text-center">
-                    <p className="text-xs text-gray-400 mb-2">Powered by</p>
-                    <div className="inline-flex items-center">
-                        <span className="mr-2">🔒</span>
-                        <span className="font-bold text-purple-900">Prüfen</span>
-                        <span className="text-xs text-gray-500 ml-2">Privacy-Preserving Verification</span>
+                {/* Footer */}
+                <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+                    <div className="inline-flex items-center text-slate-400">
+                        <ShieldCheck className="w-3 h-3 mr-1.5" />
+                        <span className="text-[10px] uppercase tracking-widest font-semibold">Secured by Prüfen</span>
                     </div>
                 </div>
             </div>
