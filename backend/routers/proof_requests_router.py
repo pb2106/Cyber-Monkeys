@@ -224,114 +224,131 @@ async def approve_proof_request(
         verifier_id=proof_request.verifier_id
     ).first()
     
-    # ============================================
-    # CRITICAL: Compute condition IN MEMORY ONLY
-    # Raw DOB is NEVER stored in the proof
-    # ============================================
-    age = (date.today() - user.dob).days // 365
+    if not verifier:
+        print(f"ERROR: Verifier not found for ID {proof_request.verifier_id}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Verifier configuration missing. Please run seed_data.py."
+        )
     
-    if proof_request.claim_type == "age_over_18":
-        result = age >= 18
-    elif proof_request.claim_type == "age_over_21":
-        result = age >= 21
-    elif proof_request.claim_type == "student_status":
-        # Jane (teen) is a student, John (adult) is not
-        result = user.user_id == "usr_demo_teen"
-    elif proof_request.claim_type == "residency_US":
-        # John (adult) is US resident, Jane (teen) is not
-        result = user.user_id == "usr_demo_adult"
-    else:
-        result = False  # Unknown claim type
-    
-    # DOB is now discarded - only YES/NO result continues
-    
-    # Generate verifier binding
-    salt = crypto_utils.generate_salt()
-    verifier_hash = crypto_utils.compute_verifier_hash(verifier.api_key, salt)
-    
-    # Generate nonce for replay protection
-    nonce = crypto_utils.generate_nonce()
-    
-    # Generate proof ID
-    proof_id = f"pf_{uuid.uuid4().hex[:12]}"
-    
-    # Create JWT payload (contains NO raw PII)
-    payload = {
-        "sub": proof_id,
-        "claim": proof_request.claim_type,
-        "result": result,  # YES/NO only!
-        "verifier_hash": verifier_hash,
-        "salt": salt,
-        "nonce": nonce,
-        "iat": datetime.utcnow(),
-        "exp": datetime.utcnow() + timedelta(seconds=300)
-    }
-    
-    # Sign with private key
-    private_key = crypto_utils.load_private_key()
-    jwt_token = jwt.encode(
-        payload,
-        private_key,
-        algorithm="RS256",
-        headers={"kid": "prufen-2024-01"}
-    )
-    
-    # Store proof
-    proof = models.Proof(
-        proof_id=proof_id,
-        user_id=request.user_id,
-        claim_type=proof_request.claim_type,
-        result=result,
-        verifier_hash=verifier_hash,
-        jwt_token=jwt_token,
-        expires_at=datetime.utcnow() + timedelta(seconds=300),
-        max_access=1,
-        access_count=0
-    )
-    
-    db.add(proof)
-    
-    # Update proof request status and result
-    proof_request.status = "approved"
-    proof_request.presentation_result = result
-    
-    # Audit log
-    audit = models.AuditLog(
-        proof_id=proof_id,
-        action="created",
-        extra_data=json.dumps({
-            "claim_type": proof_request.claim_type,
-            "data_deleted": True,
-            "privacy_preserved": True
-        })
-    )
-    
-    db.add(audit)
-    
-    # Store nonce to prevent replay
-    used_nonce = models.UsedNonce(
-        nonce=nonce,
-        expires_at=datetime.utcnow() + timedelta(seconds=300)
-    )
-    
-    db.add(used_nonce)
-    db.commit()
-    
-    # Send webhook notification if provided
-    if proof_request.callback_url:
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                await client.post(
-                    proof_request.callback_url,
-                    json={
-                        "proof_request_id": request_id,
-                        "status": "approved",
-                        "proof_url": f"http://localhost:8000/api/proofs/{proof_id}"
-                    }
-                )
-        except Exception as e:
-            print(f"Webhook delivery failed: {e}")
-            # Continue even if webhook fails
+    try:
+        # ============================================
+        # CRITICAL: Compute condition IN MEMORY ONLY
+        # Raw DOB is NEVER stored in the proof
+        # ============================================
+        age = (date.today() - user.dob).days // 365
+        
+        if proof_request.claim_type == "age_over_18":
+            result = age >= 18
+        elif proof_request.claim_type == "age_over_21":
+            result = age >= 21
+        elif proof_request.claim_type == "student_status":
+            # Jane (teen) is a student, John (adult) is not
+            result = user.user_id == "usr_demo_teen"
+        elif proof_request.claim_type == "residency_US":
+            # John (adult) is US resident, Jane (teen) is not
+            result = user.user_id == "usr_demo_adult"
+        else:
+            result = False  # Unknown claim type
+        
+        # DOB is now discarded - only YES/NO result continues
+        
+        # Generate verifier binding
+        salt = crypto_utils.generate_salt()
+        verifier_hash = crypto_utils.compute_verifier_hash(verifier.api_key, salt)
+        
+        # Generate nonce for replay protection
+        nonce = crypto_utils.generate_nonce()
+        
+        # Generate proof ID
+        proof_id = f"pf_{uuid.uuid4().hex[:12]}"
+        
+        # Create JWT payload (contains NO raw PII)
+        payload = {
+            "sub": proof_id,
+            "claim": proof_request.claim_type,
+            "result": result,  # YES/NO only!
+            "verifier_hash": verifier_hash,
+            "salt": salt,
+            "nonce": nonce,
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + timedelta(seconds=300)
+        }
+        
+        # Sign with private key
+        private_key = crypto_utils.load_private_key()
+        jwt_token = jwt.encode(
+            payload,
+            private_key,
+            algorithm="RS256",
+            headers={"kid": "prufen-2024-01"}
+        )
+        
+        # Store proof
+        proof = models.Proof(
+            proof_id=proof_id,
+            user_id=request.user_id,
+            claim_type=proof_request.claim_type,
+            result=result,
+            verifier_hash=verifier_hash,
+            jwt_token=jwt_token,
+            expires_at=datetime.utcnow() + timedelta(seconds=300),
+            max_access=1,
+            access_count=0
+        )
+        
+        db.add(proof)
+        
+        # Update proof request status and result
+        proof_request.status = "approved"
+        proof_request.presentation_result = result
+        
+        # Audit log
+        audit = models.AuditLog(
+            proof_id=proof_id,
+            action="created",
+            extra_data=json.dumps({
+                "claim_type": proof_request.claim_type,
+                "data_deleted": True,
+                "privacy_preserved": True
+            })
+        )
+        
+        db.add(audit)
+        
+        # Store nonce to prevent replay
+        used_nonce = models.UsedNonce(
+            nonce=nonce,
+            expires_at=datetime.utcnow() + timedelta(seconds=300)
+        )
+        
+        db.add(used_nonce)
+        db.commit()
+        
+        # Send webhook notification if provided
+        if proof_request.callback_url:
+            try:
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    await client.post(
+                        proof_request.callback_url,
+                        json={
+                            "proof_request_id": request_id,
+                            "status": "approved",
+                            "proof_url": f"http://localhost:8000/api/proofs/{proof_id}"
+                        }
+                    )
+            except Exception as e:
+                print(f"Webhook delivery failed: {e}")
+                # Continue even if webhook fails
+                
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"CRITICAL ERROR in approve_proof_request: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal error generating proof: {str(e)}"
+        )
     
     return {
         "status": "success",
