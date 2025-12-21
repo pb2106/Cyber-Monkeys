@@ -36,7 +36,7 @@ User               Prüfen App           Backend API        Mock Verifier
   |                     | 4. Fetch details    |                  |
   |                     |-------------------->|                  |
   |                     | 5. Show consent     |                  |
-  | 6. Approves        |                     |                  |
+  | 6. Approves/Denies |                     |                  |
   |------------------->|                     |                  |
   |                     | 7. Generate proof   |                  |
   |                     |   (DOB → YES/NO)    |                  |
@@ -54,8 +54,9 @@ User               Prüfen App           Backend API        Mock Verifier
 - Python 3.9+
 - Node.js 18+
 - npm or yarn
+- **Cloudflare Tunnel** (Required for mobile testing)
 
-### Backend Setup
+### 1. Backend Setup
 
 ```bash
 cd backend
@@ -76,7 +77,7 @@ python main.py
 Backend will run at: **http://localhost:8000**
 API docs: **http://localhost:8000/docs**
 
-### Frontend Setup
+### 2. Frontend Setup
 
 ```bash
 cd frontend
@@ -90,11 +91,25 @@ npm run dev
 
 Frontend will run at: **http://localhost:5173**
 
+### 3. Expose to Internet (Crucial for Mobile)
+
+Since the mobile app needs to connect to your local backend, you must expose it via a tunnel. We recommend Cloudflare Tunnel.
+
+```bash
+# Install cloudflared (if not installed)
+# Download from: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation
+
+# Start tunnel
+cloudflared tunnel --url http://localhost:5173
+```
+
+Copy the `https://....trycloudflare.com` URL provided by the tunnel. Use this URL on your mobile device.
+
 ## 📱 Demo Flow
 
 ### 1. Mock Verifier (Alcohol Delivery App)
 
-Visit: **http://localhost:5173/mock-verifier/login**
+Visit: **http://localhost:5173/mock-verifier/login** (or your Cloudflare URL)
 
 **Test Accounts:**
 - `john@example.com` / `password123` (34 years old - ✓ PASSES)
@@ -109,24 +124,21 @@ Visit: **http://localhost:5173/mock-verifier/login**
 
 ### 3. Prüfen Verification
 
+**Mobile Testing (Recommended):**
+1. Open the Cloudflare URL on your mobile browser.
+2. Click **"Scan QR Code"**.
+3. Scan the QR code shown on your desktop.
+4. **Approve**: Click "Approve Verification".
+   - Desktop should show "Verification Successful".
+5. **Deny**: Click "Decline Request".
+   - Desktop should show "Verification Denied".
+
 **Desktop Testing:**
-1. Right-click QR code → Save image
-2. Open **http://localhost:5173** in new tab (Prüfen app)
-3. Click "Upload QR Image"
-4. Select saved QR code
-5. Review consent screen
-6. Click "Approve Verification"
-7. Return to verifier tab
-
-**Mobile Testing:**
-1. Open Prüfen app on mobile
-2. Click "Scan QR Code"
-3. Scan QR from desktop screen
-4. Approve verification
-
-### 4. Verification Complete
-
-Verifier receives **YES/NO only** - no personal data!
+1. Right-click QR code → Save image.
+2. Open **http://localhost:5173** in new tab.
+3. Click "Upload QR Image".
+4. Select saved QR code.
+5. Approve or Decline.
 
 ## 🔐 Security Mechanisms
 
@@ -160,12 +172,6 @@ nonce = secrets.token_hex(32)
 jwt.encode(payload, private_key, algorithm="RS256")
 ```
 
-### 6. Audit Trail
-```python
-# Immutable audit log for all operations
-AuditLog(proof_id, action, timestamp, metadata)
-```
-
 ## 📊 Database Schema
 
 ### Proofs
@@ -179,15 +185,6 @@ AuditLog(proof_id, action, timestamp, metadata)
 | jwt_token | Text | Signed cryptographic proof |
 | expires_at | DateTime | 5-minute TTL |
 | access_count | Integer | Single-use counter |
-
-### Audit Log
-| Field | Type | Description |
-|-------|------|-------------|
-| log_id | Integer | Auto-increment |
-| proof_id | String | Proof reference |
-| action | String | created, accessed, expired |
-| timestamp | DateTime | When action occurred |
-| metadata | Text | Additional context (JSON) |
 
 ## 🔑 API Endpoints
 
@@ -210,97 +207,16 @@ POST /api/proof-requests/{request_id}/approve
 }
 ```
 
+### Reject Proof
+```http
+POST /api/proof-requests/{request_id}/reject
+```
+
 ### Fetch Proof
 ```http
 GET /api/proofs/{proof_id}
 Authorization: Bearer {verifier_api_key}
 ```
-
-### Response (What Verifier Receives)
-```json
-{
-  "proof_id": "pf_abc123",
-  "claim_type": "age_over_18",
-  "result": true,  // YES or NO only!
-  "signature": "eyJhbGc...",
-  "privacy_guarantee": "This proof contains NO personal data."
-}
-```
-
-## 🎨 Frontend Features
-
-### Prüfen App
-- **Home Page**: Scan or upload QR codes
-- **QR Scanner**: Live camera scanning with html5-qrcode
-- **Consent Screen**: Privacy-focused disclosure
-- **Success Page**: Confirmation with privacy guarantees
-
-### Mock Verifier App
-- **Login**: Demo accounts with different ages
-- **Age Gate**: QR code generation
-- **Verified Page**: Shows received proof (YES/NO only)
-
-## 🧪 Testing
-
-### Test Cases
-
-**1. Valid Adult User**
-```bash
-# Login as john@example.com (34 years old)
-# Generate QR → Scan → Approve → Should receive YES
-```
-
-**2. Valid Young Adult**
-```bash
-# Login as bob@example.com (20 years old)
-# Generate QR → Scan → Approve → Should receive YES
-```
-
-**3. Underage User**
-```bash
-# Login as jane@example.com (14 years old)
-# Generate QR → Scan → Approve → Should receive NO
-```
-
-**4. Expired Proof**
-```bash
-# Generate proof → Wait 6 minutes → Try to access → Should fail with 410 Gone
-```
-
-**5. Replay Attack**
-```bash
-# Fetch proof → Try to fetch again → Should fail with "already consumed"
-```
-
-**6. Wrong Verifier**
-```bash
-# Generate proof for Verifier A → Try to access with Verifier B API key
-# Should fail with 403 Forbidden
-```
-
-## 📚 Privacy Guarantees
-
-### What Verifiers GET:
-✅ **YES or NO result only**
-✅ Cryptographic signature (RS256)
-✅ Claim type (e.g., "age_over_18")
-✅ Expiration time
-✅ Proof ID
-
-### What Verifiers DON'T GET:
-❌ Date of birth
-❌ Name
-❌ ID number
-❌ Address
-❌ Any other personal data
-
-### Data Lifecycle
-1. **User DOB read from database**
-2. **Age calculated IN MEMORY**
-3. **YES/NO result generated**
-4. **Raw DOB immediately discarded**
-5. **Only YES/NO stored in proof**
-6. **Proof auto-deleted after 5 minutes**
 
 ## 🛠️ Technology Stack
 
@@ -330,38 +246,9 @@ SECRET_KEY=your-secret-key-change-in-production
 FRONTEND_URL=http://localhost:5173
 ```
 
-## 🚢 Production Deployment
-
-### Security Checklist
-- [ ] Use PostgreSQL instead of SQLite
-- [ ] Store RSA keys in AWS KMS or HashiCorp Vault
-- [ ] Enable HTTPS only
-- [ ] Restrict CORS to specific origins
-- [ ] Add rate limiting
-- [ ] Implement proper authentication
-- [ ] Set up monitoring and alerts
-- [ ] Enable audit log archival
-- [ ] Add proof cleanup job (delete expired proofs)
-
-### Deployment Options
-- **Backend**: AWS ECS, Google Cloud Run, Heroku
-- **Frontend**: Vercel, Netlify, AWS S3 + CloudFront
-- **Database**: AWS RDS, Google Cloud SQL
-
-## 🤝 Contributing
-
-This is a demo project showcasing privacy-preserving verification. Feel free to:
-- Report issues
-- Suggest improvements
-- Submit pull requests
-
 ## 📄 License
 
 MIT License - feel free to use for educational or commercial purposes.
-
-## 🙏 Acknowledgments
-
-Inspired by zero-knowledge proof systems and privacy-preserving cryptography.
 
 ---
 
