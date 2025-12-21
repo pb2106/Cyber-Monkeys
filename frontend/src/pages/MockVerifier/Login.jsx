@@ -105,9 +105,12 @@ export default function Login() {
         setPolling(true);
         const pollProof = async () => {
             try {
-                const response = await api.get(`/proof-requests/${proofRequest.id}`);
-                if (response.data && response.data.proof) {
-                    setProofData(response.data.proof);
+                const response = await api.get(`/proof-requests/${proofRequest.proof_request_id}`);
+                if (response.data && response.data.status === 'approved' && response.data.presentation_result !== null) {
+                    setProofData({
+                        result: response.data.presentation_result ? 'PASS' : 'FAIL',
+                        proof_id: response.data.proof_id
+                    });
                     setPolling(false);
                     if (window.pollInterval) {
                         clearInterval(window.pollInterval);
@@ -133,15 +136,21 @@ export default function Login() {
         setLoading(true);
         try {
             const response = await api.post('/proof-requests', {
-                user_id: localStorage.getItem('mock_user_id'),
                 condition: verificationType.condition,
-                verifier_public_key: verifierKeys[verificationType.id]
+                expires_in: 1800  // 30 minutes
+            }, {
+
+                headers: {
+                    'Authorization': `Bearer ${verifierKeys[verificationType.id]}`
+                }
             });
             setProofRequest(response.data);
             setActiveVerification(verificationType.id);
             setProofData(null);
         } catch (error) {
             console.error('Error creating proof request:', error);
+            console.error('Response data:', error.response?.data);  // ← Add this line
+            console.error('Request headers:', error.config?.headers);  // ← Add this line
         } finally {
             setLoading(false);
         }
@@ -177,7 +186,7 @@ export default function Login() {
                         {/* Quick Login Section */}
                         <div className="space-y-3 mb-8">
                             <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-4">Quick Login</p>
-                            
+
                             <button
                                 onClick={() => handleQuickLogin('john')}
                                 className="w-full group relative overflow-hidden rounded-xl p-4 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-blue-500/50 transition-all duration-300"
@@ -302,13 +311,6 @@ export default function Login() {
                             })}
                         </div>
 
-                        {/* Info footer */}
-                        <div className="rounded-xl bg-slate-800/30 border border-slate-700 p-6 text-center">
-                            <p className="text-slate-400 text-sm mb-2">🔐 Privacy Guaranteed</p>
-                            <p className="text-xs text-slate-500 leading-relaxed">
-                                Each verification generates a unique zero-knowledge proof. Verifiers receive only a YES/NO result without accessing any of your personal information.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -339,11 +341,7 @@ export default function Login() {
                         <div className="mb-8 p-6 bg-white rounded-2xl">
                             {proofRequest && (
                                 <QRCodeSVG
-                                    value={JSON.stringify({
-                                        proof_request_id: proofRequest.id,
-                                        condition: proofRequest.condition,
-                                        verifier_key: proofRequest.verifier_public_key
-                                    })}
+                                    value={JSON.stringify(proofRequest)}
                                     size={256}
                                     level="H"
                                     includeMargin={true}
@@ -428,7 +426,7 @@ export default function Login() {
                                 </div>
                                 <div>
                                     <p className="text-slate-500 text-xs uppercase tracking-wide mb-1">Proof ID</p>
-                                    <p className="font-mono text-xs">{proofRequest?.id?.substring(0, 16)}...</p>
+                                    <p className="font-mono text-xs">{proofData?.proof_id?.substring(0, 16)}...</p>
                                 </div>
                             </div>
                         </div>

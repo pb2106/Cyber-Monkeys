@@ -16,7 +16,16 @@ export default defineConfig({
             '/api': {
                 target: 'http://localhost:8000',
                 changeOrigin: true,
+                configure: (proxy, options) => {
+                    proxy.on('proxyReq', (proxyReq, req, res) => {
+                        // Preserve Authorization header through proxy
+                        if (req.headers.authorization) {
+                            proxyReq.setHeader('Authorization', req.headers.authorization);
+                        }
+                    });
+                }
             }
         }
+
     }
 })

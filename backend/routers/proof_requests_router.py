@@ -150,6 +150,16 @@ async def get_proof_request(
         "resident_of_eu": "Are you a resident of the EU?"
     }
     
+    # Get the associated proof if the request has been approved
+    proof_id = None
+    if proof_request.status == "approved":
+        proof = db.query(models.Proof).filter_by(
+            claim_type=proof_request.claim_type,
+            result=proof_request.presentation_result
+        ).order_by(models.Proof.created_at.desc()).first()
+        if proof:
+            proof_id = proof.proof_id
+    
     return {
         "proof_request_id": proof_request.proof_request_id,
         "claim_type": proof_request.claim_type,
@@ -161,8 +171,10 @@ async def get_proof_request(
         "verifier_domain": verifier.domain,
         "expires_at": proof_request.expires_at.isoformat(),
         "status": proof_request.status,
-        "presentation_result": proof_request.presentation_result
+        "presentation_result": proof_request.presentation_result,
+        "proof_id": proof_id
     }
+
 
 
 @router.post("/{request_id}/approve")
