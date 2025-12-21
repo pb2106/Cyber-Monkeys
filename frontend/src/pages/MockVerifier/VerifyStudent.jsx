@@ -44,7 +44,13 @@ export default function VerifyStudent() {
             try {
                 if (!proofRequest?.proof_request_id) return;
                 const res = await api.get(`/proof-requests/${proofRequest.proof_request_id}`);
-                if (res.data.status === 'approved') {
+                if (res.data.status === 'rejected') {
+                    console.log('Proof rejected!');
+                    clearInterval(pollInterval);
+                    window.pollInterval = null;
+                    setProofData({ ...res.data, presentation_result: false, rejected: true });
+                    setPolling(false);
+                } else if (res.data.status === 'approved') {
                     console.log('Proof approved!');
                     clearInterval(pollInterval);
                     window.pollInterval = null;
@@ -110,10 +116,10 @@ export default function VerifyStudent() {
                         )}
                     </div>
                     <h1 className="text-2xl font-bold mb-2 text-slate-900">
-                        {isSuccess ? 'Verification Successful' : 'Verification Failed'}
+                        {proofData.rejected ? 'Verification Denied' : isSuccess ? 'Verification Successful' : 'Verification Failed'}
                     </h1>
                     <p className="text-slate-500 mb-8 text-sm">
-                        {isSuccess ? 'Student status confirmed.' : 'Student status could not be verified.'}
+                        {proofData.rejected ? 'User declined the request.' : isSuccess ? 'Student status confirmed.' : 'Student status could not be verified.'}
                     </p>
                     <div className="bg-slate-50 rounded-lg p-4 mb-8 text-left border border-slate-100">
                         <div className="flex justify-between mb-2">

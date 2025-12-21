@@ -106,7 +106,18 @@ export default function Login() {
         const pollProof = async () => {
             try {
                 const response = await api.get(`/proof-requests/${proofRequest.proof_request_id}`);
-                if (response.data && response.data.status === 'approved' && response.data.presentation_result !== null) {
+
+                if (response.data && response.data.status === 'rejected') {
+                    setProofData({
+                        result: 'DENIED',
+                        proof_id: null
+                    });
+                    setPolling(false);
+                    if (window.pollInterval) {
+                        clearInterval(window.pollInterval);
+                        window.pollInterval = null;
+                    }
+                } else if (response.data && response.data.status === 'approved' && response.data.presentation_result !== null) {
                     setProofData({
                         result: response.data.presentation_result ? 'PASS' : 'FAIL',
                         proof_id: response.data.proof_id
@@ -401,9 +412,11 @@ export default function Login() {
                     <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-12 text-center">
                         {/* Icon */}
                         <div className="mb-8 flex justify-center">
-                            <div className={`p-4 rounded-full ${isSuccess ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                            <div className={`p-4 rounded-full ${isSuccess ? 'bg-emerald-500/20' : proofData.result === 'DENIED' ? 'bg-slate-500/20' : 'bg-red-500/20'}`}>
                                 {isSuccess ? (
                                     <CheckCircle2 className="w-16 h-16 text-emerald-400" />
+                                ) : proofData.result === 'DENIED' ? (
+                                    <LogOut className="w-16 h-16 text-slate-400" />
                                 ) : (
                                     <XCircle className="w-16 h-16 text-red-400" />
                                 )}
@@ -411,8 +424,8 @@ export default function Login() {
                         </div>
 
                         {/* Result text */}
-                        <h2 className={`text-4xl font-bold mb-4 ${isSuccess ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {isSuccess ? 'VERIFIED' : 'NOT VERIFIED'}
+                        <h2 className={`text-4xl font-bold mb-4 ${isSuccess ? 'text-emerald-400' : proofData.result === 'DENIED' ? 'text-slate-400' : 'text-red-400'}`}>
+                            {isSuccess ? 'VERIFIED' : proofData.result === 'DENIED' ? 'REQUEST DENIED' : 'NOT VERIFIED'}
                         </h2>
 
                         <p className="text-slate-400 text-lg mb-6">

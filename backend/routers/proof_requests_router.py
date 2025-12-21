@@ -338,3 +338,43 @@ async def approve_proof_request(
         "proof_id": proof_id,
         "message": "Proof generated. Your data has been deleted from memory."
     }
+
+
+@router.post("/{request_id}/reject")
+async def reject_proof_request(
+    request_id: str,
+    db: Session = Depends(get_db)
+):
+    """
+    User rejects proof request.
+    """
+    # Fetch proof request
+    proof_request = db.query(models.ProofRequest).filter_by(
+        proof_request_id=request_id
+    ).first()
+    
+    if not proof_request:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Proof request not found"
+        )
+    
+    # Update status
+    proof_request.status = "rejected"
+    db.commit()
+    
+    # Send webhook notification if provided
+    if proof_request.callback_url:
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                await client.post(
+                    proof_request.callback_url,
+                    json={
+                        "proof_request_id": request_id,
+                        "status": "rejected"
+                    }
+                )
+        except Exception as e:
+            print(f"Webhook delivery failed: {e}")
+            
+    return {"status": "rejected"}
