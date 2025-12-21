@@ -276,7 +276,7 @@ async def approve_proof_request(
         }
         
         # Sign with private key
-        private_key = crypto_utils.load_private_key()
+        private_key = crypto_utils.load_private_key_bytes()
         jwt_token = jwt.encode(
             payload,
             private_key,

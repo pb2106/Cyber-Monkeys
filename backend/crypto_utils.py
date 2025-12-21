@@ -61,6 +61,12 @@ def load_private_key(path: str = "keys/private_key.pem"):
         )
 
 
+def load_private_key_bytes(path: str = "keys/private_key.pem") -> bytes:
+    """Load private key as raw bytes (PEM)."""
+    with open(path, "rb") as f:
+        return f.read()
+
+
 def load_public_key(path: str = "keys/public_key.pem"):
     """Load public key from PEM file."""
     with open(path, "rb") as f:
