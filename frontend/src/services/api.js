@@ -4,12 +4,7 @@ import axios from 'axios';
 // If accessed via Cloudflare tunnel, connect directly to backend
 // Otherwise use Vite proxy
 const getBaseURL = () => {
-    const hostname = window.location.hostname;
-    if (hostname.includes('trycloudflare.com')) {
-        // Accessed via Cloudflare tunnel - connect directly to backend
-        return 'http://localhost:8000/api';
-    }
-    // Local development - use Vite proxy
+    // Always use relative path to let Vite proxy or Nginx handle it
     return '/api';
 };
 

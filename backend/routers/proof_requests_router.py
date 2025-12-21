@@ -37,7 +37,7 @@ class ProofRequestResponse(BaseModel):
     request_token: str
     verifier: VerifierInfo
     claim: ClaimInfo
-    callback_url: str
+    callback_url: Optional[str] = None
     expires_at: str
     issued_at: str
 
@@ -58,6 +58,7 @@ async def create_proof_request(
     """
     # Extract and validate API key
     print(f"DEBUG: Received authorization header: {authorization}")
+    print(f"DEBUG: Request body: {request}")
     
     if not authorization:
         raise HTTPException(
@@ -107,7 +108,7 @@ async def create_proof_request(
             "type": request.condition,
             "display": "Are you 18 or older?" if request.condition == "age_over_18" else request.condition
         },
-        "callback_url": request.callback_url or f"http://localhost:5173/api/verify-proof",
+        "callback_url": request.callback_url,
         "expires_at": proof_request.expires_at.isoformat(),
         "issued_at": datetime.utcnow().isoformat()
     }

@@ -135,7 +135,7 @@ export default function Login() {
     const handleVerificationRequest = async (verificationType) => {
         setLoading(true);
         try {
-            const response = await api.post('/proof-requests', {
+            const response = await api.post('/proof-requests/', {
                 condition: verificationType.condition,
                 expires_in: 1800  // 30 minutes
             }, {
@@ -145,6 +145,8 @@ export default function Login() {
                 }
             });
             setProofRequest(response.data);
+            console.log('Proof request data for QR code:', response.data);
+            console.log('QR code JSON string:', JSON.stringify(response.data));
             setActiveVerification(verificationType.id);
             setProofData(null);
         } catch (error) {
@@ -342,8 +344,8 @@ export default function Login() {
                             {proofRequest && (
                                 <QRCodeSVG
                                     value={JSON.stringify(proofRequest)}
-                                    size={256}
-                                    level="H"
+                                    size={400}
+                                    level="M"
                                     includeMargin={true}
                                 />
                             )}
@@ -356,7 +358,7 @@ export default function Login() {
                                 <span>Waiting for proof submission...</span>
                             </div>
                             <p className="text-sm text-slate-500 font-mono">
-                                ID: {proofRequest?.id?.substring(0, 12)}...
+                                ID: {proofRequest?.proof_request_id?.substring(0, 12)}...
                             </p>
                         </div>
 

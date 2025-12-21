@@ -23,8 +23,8 @@ export default function Home() {
             const proofRequest = JSON.parse(decodedText);
 
             // Validate it's a valid proof request
-            if (!proofRequest.proof_request_id || !proofRequest.claim) {
-                throw new Error('Invalid proof request format');
+            if (!proofRequest.proof_request_id) {
+                throw new Error('Invalid proof request format: missing ID');
             }
 
             // Navigate to consent screen with the proof request data

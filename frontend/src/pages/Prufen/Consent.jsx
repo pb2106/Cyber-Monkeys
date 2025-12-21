@@ -61,19 +61,28 @@ export default function Consent() {
             });
 
             if (request.callback_url) {
-                try {
-                    await fetch(request.callback_url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            proof_request_id: request_id,
-                            proof_id: res.data.proof_id,
-                            status: 'approved',
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-                } catch (callbackErr) {
-                    console.error('Failed to send to callback:', callbackErr);
+                // GUARD: If running on Cloudflare/remote but callback is localhost, SKIP IT.
+                // This prevents CORS errors from stale QR codes or default backend config.
+                const isLocalhostCallback = request.callback_url.includes('localhost') || request.callback_url.includes('127.0.0.1');
+                const isRemoteOrigin = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
+                if (isRemoteOrigin && isLocalhostCallback) {
+                    console.warn('Skipping localhost callback because we are on a remote origin:', request.callback_url);
+                } else {
+                    try {
+                        await fetch(request.callback_url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                proof_request_id: request_id,
+                                proof_id: res.data.proof_id,
+                                status: 'approved',
+                                timestamp: new Date().toISOString()
+                            })
+                        });
+                    } catch (callbackErr) {
+                        console.error('Failed to send to callback:', callbackErr);
+                    }
                 }
             }
 
