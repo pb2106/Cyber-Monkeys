@@ -12,28 +12,50 @@ export default function Home() {
 
         setUploading(true);
 
-        // Use html5-qrcode to decode uploaded image
-        const { Html5Qrcode } = await import('html5-qrcode');
-        const html5QrCode = new Html5Qrcode("qr-reader-upload");
-
         try {
-            const decodedText = await html5QrCode.scanFile(file, false);
+            // Create an image element to load the file
+            const img = new Image();
+            const reader = new FileReader();
 
-            // Parse JSON from QR code
-            const proofRequest = JSON.parse(decodedText);
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
 
-            // Validate it's a valid proof request
-            if (!proofRequest.proof_request_id) {
-                throw new Error('Invalid proof request format: missing ID');
-            }
+            reader.readAsDataURL(file);
 
-            // Navigate to consent screen with the proof request data
-            navigate(`/consent/${proofRequest.proof_request_id}`, {
-                state: { request: proofRequest }
+            await new Promise((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Failed to load image'));
             });
+
+            // Draw image to canvas to get pixel data
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+            // Use jsQR to decode
+            const { default: jsQR } = await import('jsqr');
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            if (code) {
+                const proofRequest = JSON.parse(code.data);
+
+                if (!proofRequest.proof_request_id) {
+                    throw new Error('Invalid proof request format: missing ID');
+                }
+
+                navigate(`/consent/${proofRequest.proof_request_id}`, {
+                    state: { request: proofRequest }
+                });
+            } else {
+                throw new Error('QR code not found');
+            }
         } catch (error) {
-            alert('Invalid QR code or unable to decode');
             console.error('QR decode error:', error);
+            alert('Could not find a QR code in this image. Please ensure the image is clear and contains a valid QR code.');
         }
 
         setUploading(false);
