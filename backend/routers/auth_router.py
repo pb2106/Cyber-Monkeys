@@ -4,7 +4,7 @@ Authentication endpoints for mock verifier users.
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import models
 import auth
 from database import get_db

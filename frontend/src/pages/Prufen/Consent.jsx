@@ -8,16 +8,33 @@ export default function Consent() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const [request, setRequest] = useState(location.state?.request);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [showUserSelector, setShowUserSelector] = useState(false);
+    const [request, setRequest] = useState(location.state?.request || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        const userId = localStorage.getItem('mock_user_id');
+        const userName = localStorage.getItem('user_name');
+
+        if (userId && userName) {
+            setCurrentUser({ id: userId, name: userName });
+        } else {
+            setShowUserSelector(true);
+        }
+
         if (!request) {
-            // Fetch request details if not passed via state
             fetchRequestDetails();
         }
     }, [request_id]);
+
+    const selectUser = (user) => {
+        localStorage.setItem('mock_user_id', user.id);
+        localStorage.setItem('user_name', user.name);
+        setCurrentUser(user);
+        setShowUserSelector(false);
+    };
 
     const fetchRequestDetails = async () => {
         try {
@@ -30,29 +47,24 @@ export default function Consent() {
     };
 
     const handleApprove = async () => {
+        if (!currentUser) {
+            setShowUserSelector(true);
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
         try {
-            // Get mock user ID (in real app, from authentication)
-            const mockUserId = localStorage.getItem('mock_user_id') || 'usr_demo_adult';
-
-            // Generate proof through backend
             const res = await api.post(`/proof-requests/${request_id}/approve`, {
-                user_id: mockUserId
+                user_id: currentUser.id
             });
 
-            console.log('Proof generated:', res.data);
-
-            // Send proof directly to verifier's callback URL
             if (request.callback_url) {
                 try {
-                    console.log('Sending proof to callback:', request.callback_url);
                     await fetch(request.callback_url, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             proof_request_id: request_id,
                             proof_id: res.data.proof_id,
@@ -60,21 +72,55 @@ export default function Consent() {
                             timestamp: new Date().toISOString()
                         })
                     });
-                    console.log('Proof sent to verifier callback');
                 } catch (callbackErr) {
                     console.error('Failed to send to callback:', callbackErr);
-                    // Continue even if callback fails
                 }
             }
 
             navigate('/success');
         } catch (err) {
             setError(err.response?.data?.detail || 'Approval failed');
-            console.error('Approval error:', err);
         }
 
         setLoading(false);
     };
+
+    if (showUserSelector) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-8 border border-slate-100">
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2 text-center">Select Demo Persona</h2>
+                    <p className="text-slate-500 mb-6 text-center">Who are you acting as for this test?</p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => selectUser({ id: 'usr_demo_adult', name: 'John Doe' })}
+                            className="w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-white hover:shadow-md transition-all group"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-bold text-slate-900 group-hover:text-blue-600">John Doe (Adult)</p>
+                                    <p className="text-sm text-slate-500">Age: 34 • Resident</p>
+                                </div>
+                                <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => selectUser({ id: 'usr_demo_teen', name: 'Jane Smith' })}
+                            className="w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-white hover:shadow-md transition-all group"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-bold text-slate-900 group-hover:text-blue-600">Jane Smith (Teen)</p>
+                                    <p className="text-sm text-slate-500">Age: 14 • Student</p>
+                                </div>
+                                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (error && !request) {
         return (
@@ -85,10 +131,7 @@ export default function Consent() {
                     </div>
                     <h1 className="text-xl font-bold text-slate-900 mb-2">Request Not Found</h1>
                     <p className="text-slate-500 mb-8">{error}</p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors"
-                    >
+                    <button onClick={() => navigate('/')} className="bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors">
                         Return Home
                     </button>
                 </div>
@@ -104,9 +147,26 @@ export default function Consent() {
         );
     }
 
+    const claimDisplay = request.claim?.display || request.claim_display;
+    const isStudent = request.claim_type === 'student_status';
+    const isResidency = request.claim_type === 'residency_US';
+
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
-            <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full overflow-hidden relative">
+                {/* User Badge */}
+                {currentUser && (
+                    <div className="absolute top-4 right-4 z-10">
+                        <button
+                            onClick={() => setShowUserSelector(true)}
+                            className="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 transition-colors"
+                        >
+                            <div className={`w-2 h-2 rounded-full ${currentUser.id === 'usr_demo_adult' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                            <span>{currentUser.name}</span>
+                        </button>
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="p-6 border-b border-slate-100">
                     <div className="flex items-center justify-between mb-6">
@@ -117,9 +177,8 @@ export default function Consent() {
                             <ShieldCheck className="w-5 h-5 mr-2 text-slate-900" />
                             Prüfen
                         </div>
-                        <div className="w-5"></div> {/* Spacer */}
+                        <div className="w-5"></div>
                     </div>
-
                     <div className="text-center">
                         <h1 className="text-xl font-bold text-slate-900 mb-1">Verification Request</h1>
                         <p className="text-sm text-slate-500">
@@ -133,13 +192,12 @@ export default function Consent() {
                     <div className="bg-slate-50 rounded-xl p-6 text-center mb-6 border border-slate-100">
                         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">They want to verify</p>
                         <p className="text-lg font-medium text-slate-900">
-                            {request.claim?.display || request.claim_display}
+                            {isStudent ? 'Student Status' : isResidency ? 'US Residency' : claimDisplay}
                         </p>
                     </div>
 
-                    {/* Privacy Disclosure - THE CORE VALUE PROP */}
+                    {/* Privacy Disclosure */}
                     <div className="space-y-4 mb-8">
-                        {/* What they get */}
                         <div className="flex items-start">
                             <div className="flex-shrink-0 mt-0.5">
                                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
@@ -149,15 +207,13 @@ export default function Consent() {
                                 <p className="text-xs text-slate-500 mt-0.5">A simple YES or NO confirmation only.</p>
                             </div>
                         </div>
-
-                        {/* What they don't get */}
                         <div className="flex items-start">
                             <div className="flex-shrink-0 mt-0.5">
                                 <XCircle className="w-5 h-5 text-slate-300" />
                             </div>
                             <div className="ml-3">
                                 <p className="text-sm font-semibold text-slate-900">They will NOT see</p>
-                                <p className="text-xs text-slate-500 mt-0.5">Your date of birth, name, ID number, or address.</p>
+                                <p className="text-xs text-slate-500 mt-0.5">Your private details or raw ID data.</p>
                             </div>
                         </div>
                     </div>
@@ -178,7 +234,6 @@ export default function Consent() {
                         </div>
                     </div>
 
-                    {/* Error Display */}
                     {error && (
                         <div className="mb-6 bg-red-50 border border-red-100 text-red-600 p-3 rounded-lg text-sm flex items-center">
                             <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
@@ -186,7 +241,6 @@ export default function Consent() {
                         </div>
                     )}
 
-                    {/* Actions */}
                     <button
                         onClick={handleApprove}
                         disabled={loading}
@@ -201,16 +255,10 @@ export default function Consent() {
                             'Approve Verification'
                         )}
                     </button>
-
-                    <button
-                        onClick={() => navigate('/')}
-                        className="w-full text-slate-500 hover:text-slate-700 p-3 font-medium text-sm transition-colors"
-                    >
+                    <button onClick={() => navigate('/')} className="w-full text-slate-500 hover:text-slate-700 p-3 font-medium text-sm transition-colors">
                         Decline Request
                     </button>
                 </div>
-
-                {/* Footer */}
                 <div className="bg-slate-50 p-4 text-center border-t border-slate-100">
                     <p className="text-[10px] text-slate-400 flex items-center justify-center">
                         <Lock className="w-3 h-3 mr-1" />

@@ -174,9 +174,13 @@ async def get_public_key():
     """
     Serve public key for proof verification.
     """
-    from fastapi.responses import PlainTextResponse
+    public_key = crypto_utils.load_public_key()
     
-    with open("keys/public_key.pem", "r") as f:
-        public_key_pem = f.read()
+    # Convert to PEM format
+    from cryptography.hazmat.primitives import serialization
+    public_pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
     
-    return public_key_pem
+    return public_pem.decode('utf-8')

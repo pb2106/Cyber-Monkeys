@@ -32,12 +32,12 @@ verifiers_data = [
     {
         "company_name": "OnlineCasino.io",
         "domain": "onlinecasino.io",
-        "api_key": crypto_utils.generate_api_key()
+        "api_key": "pk_motlljUo4BsMnXslYtTyiq2lrDMp13lCpZXJkE89vNk"
     },
     {
         "company_name": "StreamingService",
         "domain": "streaming.tv",
-        "api_key": crypto_utils.generate_api_key()
+        "api_key": "pk_D9rCkll5Mn6Qc0o8QgOp5XYv4v8gvgDAQEqYuHS93rU"
     }
 ]
 

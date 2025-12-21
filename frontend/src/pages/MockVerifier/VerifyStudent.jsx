@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { ShieldCheck, AlertTriangle, Loader2, Lock } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Loader2, Lock, GraduationCap } from 'lucide-react';
 import api from '../../services/api';
 
-export default function VerifyAge() {
+export default function VerifyStudent() {
     const [proofRequest, setProofRequest] = useState(null);
     const [loading, setLoading] = useState(false);
     const [polling, setPolling] = useState(false);
@@ -12,7 +12,6 @@ export default function VerifyAge() {
     const userName = localStorage.getItem('user_name') || 'User';
 
     useEffect(() => {
-        // Start polling when we have a proof request
         if (proofRequest && !proofData) {
             startPolling();
         }
@@ -70,13 +69,13 @@ export default function VerifyAge() {
     const requestProof = async () => {
         setLoading(true);
         try {
-            const VERIFIER_API_KEY = 'pk_4cZLBbGW4jAcbNBNw5KmTG1R4Bx49kFoTjFDizaRZEA';
+            const VERIFIER_API_KEY = 'pk_D9rCkll5Mn6Qc0o8QgOp5XYv4v8gvgDAQEqYuHS93rU';
             const headers = {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${VERIFIER_API_KEY}`
             };
             const body = {
-                condition: 'age_over_18',
+                condition: 'student_status',
                 expires_in: 300,
                 callback_url: `${window.location.origin}/api/webhooks/proof-received`
             };
@@ -114,12 +113,12 @@ export default function VerifyAge() {
                         {isSuccess ? 'Verification Successful' : 'Verification Failed'}
                     </h1>
                     <p className="text-slate-500 mb-8 text-sm">
-                        {isSuccess ? 'Age requirement met.' : 'Age requirement NOT met.'}
+                        {isSuccess ? 'Student status confirmed.' : 'Student status could not be verified.'}
                     </p>
                     <div className="bg-slate-50 rounded-lg p-4 mb-8 text-left border border-slate-100">
                         <div className="flex justify-between mb-2">
                             <span className="text-xs text-slate-500">Claim</span>
-                            <span className="text-xs font-semibold text-slate-900">Age 18+</span>
+                            <span className="text-xs font-semibold text-slate-900">Student Status</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-xs text-slate-500">Result</span>
@@ -140,19 +139,19 @@ export default function VerifyAge() {
         <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 font-sans">
             <div className="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full border border-slate-200">
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-amber-100 rounded-full mb-4">
-                        <span className="text-2xl">🍺</span>
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4">
+                        <span className="text-2xl">🎧</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-slate-900 mb-1">AlcoholDelivery.com</h1>
+                    <h1 className="text-2xl font-bold text-slate-900 mb-1">StreamingService</h1>
                     <p className="text-slate-500 text-sm">Welcome back, {userName}</p>
                 </div>
-                <div className="bg-amber-50 border border-amber-200 p-5 rounded-lg mb-8">
+                <div className="bg-purple-50 border border-purple-200 p-5 rounded-lg mb-8">
                     <div className="flex items-start">
-                        <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" />
+                        <GraduationCap className="w-5 h-5 text-purple-600 mt-0.5 mr-3 flex-shrink-0" />
                         <div>
-                            <h2 className="text-sm font-bold text-amber-900 mb-1">Age Verification Required</h2>
-                            <p className="text-sm text-amber-800 leading-relaxed">
-                                You must be <strong>18 or older</strong> to purchase alcohol. Please verify your age to continue.
+                            <h2 className="text-sm font-bold text-purple-900 mb-1">Student Status Required</h2>
+                            <p className="text-sm text-purple-800 leading-relaxed">
+                                Verify your student status to get <strong>50% off</strong> your subscription.
                             </p>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 
 // Prüfen App Pages
 import Home from './pages/Prufen/Home'
@@ -8,8 +8,6 @@ import Success from './pages/Prufen/Success'
 
 // Mock Verifier App Pages
 import Login from './pages/MockVerifier/Login'
-import VerifyAge from './pages/MockVerifier/VerifyAge'
-import Verified from './pages/MockVerifier/Verified'
 
 function App() {
     return (
@@ -20,10 +18,9 @@ function App() {
             <Route path="/consent/:request_id" element={<Consent />} />
             <Route path="/success" element={<Success />} />
 
-            {/* Mock Verifier App */}
+            {/* Mock Verifier App - All in one unified interface */}
+            <Route path="/mock-verifier" element={<Navigate to="/mock-verifier/login" replace />} />
             <Route path="/mock-verifier/login" element={<Login />} />
-            <Route path="/mock-verifier/verify-age" element={<VerifyAge />} />
-            <Route path="/mock-verifier/verified" element={<Verified />} />
         </Routes>
     )
 }

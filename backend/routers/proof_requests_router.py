@@ -160,7 +160,8 @@ async def get_proof_request(
         "verifier_name": verifier.company_name,
         "verifier_domain": verifier.domain,
         "expires_at": proof_request.expires_at.isoformat(),
-        "status": proof_request.status
+        "status": proof_request.status,
+        "presentation_result": proof_request.presentation_result
     }
 
 
@@ -220,6 +221,12 @@ async def approve_proof_request(
         result = age >= 18
     elif proof_request.claim_type == "age_over_21":
         result = age >= 21
+    elif proof_request.claim_type == "student_status":
+        # Jane (teen) is a student, John (adult) is not
+        result = user.user_id == "usr_demo_teen"
+    elif proof_request.claim_type == "residency_US":
+        # John (adult) is US resident, Jane (teen) is not
+        result = user.user_id == "usr_demo_adult"
     else:
         result = False  # Unknown claim type
     
@@ -271,8 +278,9 @@ async def approve_proof_request(
     
     db.add(proof)
     
-    # Update proof request status
+    # Update proof request status and result
     proof_request.status = "approved"
+    proof_request.presentation_result = result
     
     # Audit log
     audit = models.AuditLog(

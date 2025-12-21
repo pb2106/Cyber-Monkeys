@@ -29,6 +29,7 @@ class ProofRequest(Base):
     expires_at = Column(DateTime(timezone=True), nullable=False)
     callback_url = Column(String(500), nullable=True)
     status = Column(String(20), default="pending")  # pending, approved, expired
+    presentation_result = Column(Boolean, nullable=True)  # True (Pass) / False (Fail)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
