@@ -210,9 +210,3 @@ DATABASE_URL=sqlite:///./prufen.db
 SECRET_KEY=your-secret-key-change-in-production
 FRONTEND_URL=http://localhost:5173
 ```
-
-## License
-
-MIT License - feel free to use for educational or commercial purposes.
-
----
