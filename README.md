@@ -86,7 +86,7 @@ cd frontend
 npm install
 
 # Start development server
-npm run dev
+npm run dev -- --host
 ```
 
 Frontend will run at: **http://localhost:5173**
@@ -109,12 +109,7 @@ Copy the `https://....trycloudflare.com` URL provided by the tunnel. Use this UR
 
 ### 1. Mock Verifier (Alcohol Delivery App)
 
-Visit: **http://localhost:5173/mock-verifier/login** (or your Cloudflare URL)
-
-**Test Accounts:**
-- `john@example.com` / `password123` (34 years old - ✓ PASSES)
-- `bob@example.com` / `password123` (20 years old - ✓ PASSES)
-- `jane@example.com` / `password123` (14 years old - ✗ FAILS)
+Visit: **http://localhost:5173/mock-verified/login** (or your Cloudflare URL)
 
 ### 2. Age Verification Flow
 
