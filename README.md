@@ -4,7 +4,7 @@
 
 **Prove facts, not data.** Verify you're 18+ without revealing your date of birth.
 
-## 🎯 What is Prüfen?
+## What is Prüfen?
 
 Prüfen is a **zero-knowledge attribute verification platform** that allows users to prove claims (e.g., "I'm over 18") without revealing the underlying personal data (e.g., date of birth).
 
@@ -22,7 +22,7 @@ Prüfen is a **zero-knowledge attribute verification platform** that allows user
 - **Auditable**: Cryptographically signed with RS256
 - **Privacy-First**: Raw data never stored, only YES/NO results
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 User               Prüfen App           Backend API        Mock Verifier
@@ -48,7 +48,7 @@ User               Prüfen App           Backend API        Mock Verifier
   |<----------------------------------------------------- -------|
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.9+
@@ -105,12 +105,13 @@ cloudflared tunnel --url http://localhost:5173
 
 Copy the `https://....trycloudflare.com` URL provided by the tunnel. Use this URL on your mobile device.
 
-## 📱 Demo Flow
+## Demo Flow
 
 ### 1. Mock Verifier (Alcohol Delivery App)
-
-Visit: **http://localhost:5173/mock-verified/login** (or your Cloudflare URL)
-
+Visit:
+```bash
+ http://localhost:5173/mock-verified/login (or your Cloudflare URL)
+```
 ### 2. Age Verification Flow
 
 1. **Login** to mock verifier app
@@ -135,39 +136,8 @@ Visit: **http://localhost:5173/mock-verified/login** (or your Cloudflare URL)
 4. Select saved QR code.
 5. Approve or Decline.
 
-## 🔐 Security Mechanisms
 
-### 1. Verifier Binding
-```python
-verifier_hash = SHA256(api_key + salt)
-# Proof bound to specific verifier - cannot be used elsewhere
-```
-
-### 2. Time-to-Live (TTL)
-```python
-expires_at = now() + 300 seconds  # 5 minutes
-# Prevents long-term reuse
-```
-
-### 3. Single-Use Enforcement
-```python
-max_access = 1
-# Proof can only be fetched once
-```
-
-### 4. Nonce (Replay Protection)
-```python
-nonce = secrets.token_hex(32)
-# Stored in UsedNonce table
-```
-
-### 5. Cryptographic Signatures
-```python
-# RS256 (RSA-2048) JWT signing
-jwt.encode(payload, private_key, algorithm="RS256")
-```
-
-## 📊 Database Schema
+## Database Schema
 
 ### Proofs
 | Field | Type | Description |
@@ -181,7 +151,7 @@ jwt.encode(payload, private_key, algorithm="RS256")
 | expires_at | DateTime | 5-minute TTL |
 | access_count | Integer | Single-use counter |
 
-## 🔑 API Endpoints
+## API Endpoints
 
 ### Proof Requests
 ```http
@@ -213,7 +183,7 @@ GET /api/proofs/{proof_id}
 Authorization: Bearer {verifier_api_key}
 ```
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 **Backend:**
 - FastAPI (Python web framework)
@@ -231,7 +201,7 @@ Authorization: Bearer {verifier_api_key}
 - qrcode.react (QR generation)
 - Axios (HTTP client)
 
-## 📝 Environment Variables
+## Environment Variables
 
 Create `.env` file in backend directory:
 
@@ -241,12 +211,8 @@ SECRET_KEY=your-secret-key-change-in-production
 FRONTEND_URL=http://localhost:5173
 ```
 
-## 📄 License
+## License
 
 MIT License - feel free to use for educational or commercial purposes.
 
 ---
-
-**Built with ❤️ for privacy**
-
-🔒 **Prüfen** - Prove facts, not data.
