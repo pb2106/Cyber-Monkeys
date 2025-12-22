@@ -1,6 +1,5 @@
 # Prüfen - Privacy-Preserving Attribute Verification Platform
 
-![Prüfen Logo](https://img.shields.io/badge/Prüfen-Privacy--First-purple?style=for-the-badge)
 ![Logo](https://i.ibb.co/MTmW2vQ/logo.jpg)
 
 **Prove facts, not data.**
