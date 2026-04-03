@@ -210,3 +210,6 @@ DATABASE_URL=sqlite:///./prufen.db
 SECRET_KEY=your-secret-key-change-in-production
 FRONTEND_URL=http://localhost:5173
 ```
+### **Done by**
+- Prabhav M Naik
+- Nathan Marc Anthony[https://github.com/Nathanmarc/] 
