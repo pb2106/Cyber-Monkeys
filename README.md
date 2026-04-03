@@ -211,5 +211,5 @@ SECRET_KEY=your-secret-key-change-in-production
 FRONTEND_URL=http://localhost:5173
 ```
 ### **Done by**
-- Prabhav M Naik
+- [Prabhav M Naik](https://github.com/pb2106)
 - [Nathan Marc Anthony](https://github.com/Nathanmarc/)
