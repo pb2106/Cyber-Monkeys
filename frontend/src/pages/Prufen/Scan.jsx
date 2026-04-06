@@ -12,7 +12,6 @@ export default function Scan() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Delay scanner initialization to ensure DOM is ready
         const timer = setTimeout(() => {
             initializeScanner();
         }, 100);
@@ -30,12 +29,10 @@ export default function Scan() {
         try {
             const { Html5Qrcode } = await import('html5-qrcode');
 
-            // First, check for cameras
             try {
                 const devices = await Html5Qrcode.getCameras();
                 if (devices && devices.length) {
                     setCameras(devices);
-                    // Default to the last camera (usually back camera on mobile)
                     const cameraId = devices[devices.length - 1].id;
                     setSelectedCamera(cameraId);
                     startScanner(cameraId);
@@ -44,7 +41,6 @@ export default function Scan() {
                 }
             } catch (cameraErr) {
                 console.error('Camera enumeration failed:', cameraErr);
-                // Fallback: try starting without ID (let browser pick)
                 startScanner(null);
             }
 
@@ -58,7 +54,6 @@ export default function Scan() {
         try {
             const { Html5Qrcode } = await import('html5-qrcode');
 
-            // Ensure previous instance is stopped
             if (scannerRef.current) {
                 await stopScanner();
             }
@@ -71,7 +66,6 @@ export default function Scan() {
                 qrbox: { width: 250, height: 250 }
             };
 
-            // If we have a specific camera ID, use it. Otherwise use facingMode.
             const cameraConfig = cameraId
                 ? { deviceId: { exact: cameraId } }
                 : { facingMode: "environment" };
@@ -89,7 +83,6 @@ export default function Scan() {
         } catch (err) {
             console.error('Start failed with config:', cameraId, err);
 
-            // If environment failed, try user facing or default
             if (!cameraId) {
                 try {
                     console.log('Retrying with user facing mode...');
@@ -147,14 +140,12 @@ export default function Scan() {
         try {
             let requestId;
 
-            // Try parsing as JSON first (new format)
             try {
                 const data = JSON.parse(decodedText);
                 if (data.proof_request_id) {
                     requestId = data.proof_request_id;
                 }
             } catch (e) {
-                // Not JSON, try URL format (legacy/fallback)
                 try {
                     const url = new URL(decodedText);
                     requestId = url.pathname.split('/').pop();
@@ -167,11 +158,9 @@ export default function Scan() {
                 throw new Error('No request ID found');
             }
 
-            // Navigate to consent screen
             navigate(`/consent/${requestId}`);
         } catch (err) {
-            alert('Invalid QR code format. Please scan a valid Prüfen request.');
-            // Give user time to see the alert before restarting
+            alert('Invalid QR code format. Please scan a valid Veridia request.');
             setTimeout(() => initializeScanner(), 1000);
         }
     };
@@ -181,59 +170,63 @@ export default function Scan() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex flex-col font-sans">
+        <div className="min-h-screen bg-veridia-bg flex flex-col font-sans relative overflow-hidden">
+            {/* Background orbs */}
+            <div className="orb w-64 h-64 bg-emerald-600/8 -top-20 -right-20 animate-float"></div>
+            <div className="orb w-48 h-48 bg-cyan-600/8 bottom-20 -left-20 animate-float-delayed"></div>
+
             {/* Header */}
-            <div className="p-4 flex items-center justify-between bg-slate-900 z-10">
+            <div className="p-4 flex items-center justify-between z-10 relative">
                 <button
                     onClick={() => navigate('/')}
-                    className="text-slate-300 flex items-center hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800"
+                    className="text-slate-400 flex items-center hover:text-emerald-400 transition-colors p-2 rounded-lg hover:bg-emerald-500/5"
                 >
                     <ArrowLeft className="w-5 h-5 mr-2" />
                     <span className="font-medium">Back</span>
                 </button>
-                <div className="text-white font-semibold flex items-center">
-                    <Camera className="w-5 h-5 mr-2" />
+                <div className="text-slate-200 font-semibold flex items-center">
+                    <Camera className="w-5 h-5 mr-2 text-emerald-400" />
                     Scan QR Code
                 </div>
-                <div className="w-20"></div> {/* Spacer for centering */}
+                <div className="w-20"></div>
             </div>
 
             {/* Scanner Container */}
             <div className="flex-1 flex items-center justify-center p-4 relative">
-                <div className="w-full max-w-md relative z-0 min-h-[300px] bg-black rounded-3xl overflow-hidden shadow-2xl border-2 border-slate-700">
+                <div className="w-full max-w-md relative z-0 min-h-[300px] bg-black/80 rounded-3xl overflow-hidden border border-emerald-500/20 glow-emerald">
 
-                    {/* The Scanner Element - ALWAYS RENDERED */}
+                    {/* The Scanner Element */}
                     <div id="qr-reader" className="w-full h-full absolute inset-0"></div>
 
-                    {/* Overlay Guide (only show when scanning and no error) */}
+                    {/* Overlay Guide */}
                     {!loading && !error && (
                         <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                            <div className="w-64 h-64 border-2 border-blue-500/50 rounded-3xl relative">
-                                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-xl"></div>
-                                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-xl"></div>
-                                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-xl"></div>
-                                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-xl"></div>
+                            <div className="w-64 h-64 border-2 border-emerald-500/30 rounded-3xl relative">
+                                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-xl"></div>
+                                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-cyan-400 rounded-tr-xl"></div>
+                                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-cyan-400 rounded-bl-xl"></div>
+                                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-emerald-400 rounded-br-xl"></div>
                             </div>
                         </div>
                     )}
 
                     {/* Loading Overlay */}
                     {loading && (
-                        <div className="absolute inset-0 bg-slate-900 z-20 flex flex-col items-center justify-center p-6 text-center">
-                            <Loader2 className="w-10 h-10 mb-4 animate-spin text-blue-500" />
-                            <p className="font-semibold mb-2 text-lg text-white">Initializing Camera...</p>
-                            <p className="text-sm text-slate-400">Please grant camera permissions when prompted</p>
+                        <div className="absolute inset-0 bg-veridia-bg z-20 flex flex-col items-center justify-center p-6 text-center">
+                            <Loader2 className="w-10 h-10 mb-4 animate-spin text-emerald-400" />
+                            <p className="font-semibold mb-2 text-lg text-slate-100">Initializing Camera...</p>
+                            <p className="text-sm text-slate-500">Please grant camera permissions when prompted</p>
                         </div>
                     )}
 
                     {/* Error Overlay */}
                     {error && (
-                        <div className="absolute inset-0 bg-slate-900 z-30 flex flex-col items-center justify-center p-6 text-center">
-                            <div className="w-16 h-16 bg-red-900/30 rounded-full flex items-center justify-center mb-4">
-                                <AlertCircle className="w-8 h-8 text-red-500" />
+                        <div className="absolute inset-0 bg-veridia-bg z-30 flex flex-col items-center justify-center p-6 text-center">
+                            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+                                <AlertCircle className="w-8 h-8 text-red-400" />
                             </div>
                             <p className="font-bold mb-2 text-lg text-red-400">Camera Error</p>
-                            <p className="text-sm mb-6 text-slate-300 leading-relaxed max-w-xs">{error}</p>
+                            <p className="text-sm mb-6 text-slate-400 leading-relaxed max-w-xs">{error}</p>
 
                             <div className="space-y-3 w-full max-w-xs">
                                 <button
@@ -241,13 +234,13 @@ export default function Scan() {
                                         setError(null);
                                         initializeScanner();
                                     }}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                                    className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300"
                                 >
                                     Try Again
                                 </button>
                                 <button
                                     onClick={() => navigate('/')}
-                                    className="w-full bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                                    className="w-full glass text-slate-300 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300"
                                 >
                                     Go Back Home
                                 </button>
@@ -258,8 +251,8 @@ export default function Scan() {
                     {/* Scanning Indicator */}
                     {scanning && !loading && !error && (
                         <div className="absolute bottom-8 left-0 right-0 flex justify-center z-10">
-                            <div className="inline-flex items-center bg-slate-800/80 backdrop-blur-md rounded-full px-6 py-3 text-white border border-slate-700">
-                                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-3"></div>
+                            <div className="inline-flex items-center glass rounded-full px-6 py-3 text-white">
+                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-3"></div>
                                 <p className="font-medium text-sm">Scanning for codes...</p>
                             </div>
                         </div>
@@ -268,9 +261,9 @@ export default function Scan() {
             </div>
 
             {/* Footer hint */}
-            <div className="p-6 text-center bg-slate-900/90 backdrop-blur-sm z-10">
-                <div className="inline-flex items-center text-slate-500 text-xs">
-                    <Lock className="w-3 h-3 mr-1.5" />
+            <div className="p-6 text-center z-10 relative">
+                <div className="inline-flex items-center text-slate-600 text-xs">
+                    <Lock className="w-3 h-3 mr-1.5 text-emerald-500/50" />
                     <span>Your camera feed is processed locally. No images are stored.</span>
                 </div>
             </div>

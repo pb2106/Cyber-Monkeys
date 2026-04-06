@@ -11,13 +11,11 @@ export default function Login() {
     const [polling, setPolling] = useState(false);
     const [proofData, setProofData] = useState(null);
 
-    // Quick login accounts
     const accounts = {
         john: { name: 'John Doe', id: 'usr_demo_adult', ages: ['34 years old', 'Passes age verification', 'Non-student'] },
         jane: { name: 'Jane Smith', id: 'usr_demo_teen', ages: ['14 years old', 'Fails age verification', 'Student status'] }
     };
 
-    // Verification types
     const verifications = [
         {
             id: 'age',
@@ -25,9 +23,12 @@ export default function Login() {
             condition: 'age_over_18',
             description: 'Verify 18+ age requirement',
             icon: Shield,
-            bgGradient: 'from-blue-600/20 to-cyan-600/20',
-            borderColor: 'border-blue-500/30',
-            badgeColor: 'bg-blue-500/20 text-blue-300'
+            accentColor: 'emerald',
+            gradientFrom: 'from-emerald-600/15',
+            gradientTo: 'to-cyan-600/10',
+            borderHover: 'hover:border-emerald-500/40',
+            iconBg: 'bg-emerald-500/15',
+            iconColor: 'text-emerald-400',
         },
         {
             id: 'student',
@@ -35,9 +36,12 @@ export default function Login() {
             condition: 'student_status',
             description: 'Verify student enrollment',
             icon: Users,
-            bgGradient: 'from-purple-600/20 to-pink-600/20',
-            borderColor: 'border-purple-500/30',
-            badgeColor: 'bg-purple-500/20 text-purple-300'
+            accentColor: 'cyan',
+            gradientFrom: 'from-cyan-600/15',
+            gradientTo: 'to-blue-600/10',
+            borderHover: 'hover:border-cyan-500/40',
+            iconBg: 'bg-cyan-500/15',
+            iconColor: 'text-cyan-400',
         },
         {
             id: 'residency',
@@ -45,9 +49,12 @@ export default function Login() {
             condition: 'residency_US',
             description: 'Verify US residency',
             icon: MapPin,
-            bgGradient: 'from-emerald-600/20 to-teal-600/20',
-            borderColor: 'border-emerald-500/30',
-            badgeColor: 'bg-emerald-500/20 text-emerald-300'
+            accentColor: 'teal',
+            gradientFrom: 'from-teal-600/15',
+            gradientTo: 'to-emerald-600/10',
+            borderHover: 'hover:border-teal-500/40',
+            iconBg: 'bg-teal-500/15',
+            iconColor: 'text-teal-400',
         }
     ];
 
@@ -148,9 +155,8 @@ export default function Login() {
         try {
             const response = await api.post('/proof-requests/', {
                 condition: verificationType.condition,
-                expires_in: 1800  // 30 minutes
+                expires_in: 1800
             }, {
-
                 headers: {
                     'Authorization': `Bearer ${verifierKeys[verificationType.id]}`
                 }
@@ -162,72 +168,84 @@ export default function Login() {
             setProofData(null);
         } catch (error) {
             console.error('Error creating proof request:', error);
-            console.error('Response data:', error.response?.data);  // ← Add this line
-            console.error('Request headers:', error.config?.headers);  // ← Add this line
+            console.error('Response data:', error.response?.data);
+            console.error('Request headers:', error.config?.headers);
         } finally {
             setLoading(false);
         }
     };
 
+    // ═════════════════════════════════
     // LOGIN SCREEN
+    // ═════════════════════════════════
     if (!currentUser) {
         return (
-            <div className="min-h-screen bg-slate-950 text-white overflow-hidden">
-                {/* Gradient background */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute top-1/2 -left-40 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute -bottom-40 right-1/4 w-80 h-80 bg-cyan-600/10 rounded-full blur-3xl animate-pulse"></div>
-                </div>
+            <div className="min-h-screen bg-veridia-bg text-white overflow-hidden relative">
+                {/* Floating orbs */}
+                <div className="orb w-80 h-80 bg-emerald-600/8 -top-32 -right-32 animate-float"></div>
+                <div className="orb w-96 h-96 bg-cyan-600/6 top-1/2 -left-48 animate-float-delayed"></div>
+                <div className="orb w-64 h-64 bg-emerald-500/5 -bottom-20 right-1/4 animate-float-slow"></div>
 
                 <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
                     <div className="w-full max-w-md">
                         {/* Header */}
                         <div className="text-center mb-12">
                             <div className="flex justify-center mb-6">
-                                <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl">
-                                    <ShieldCheck className="w-10 h-10" />
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-emerald-500/20 rounded-2xl animate-glow-pulse"></div>
+                                    <div className="relative p-4 bg-gradient-to-br from-emerald-500 to-cyan-600 rounded-2xl shadow-lg">
+                                        <ShieldCheck className="w-10 h-10" />
+                                    </div>
                                 </div>
                             </div>
-                            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                                Prüfen
+                            <h1 className="text-4xl font-bold mb-3 text-gradient">
+                                Veridia
                             </h1>
                             <p className="text-slate-400 text-lg">Privacy-Preserving Verification</p>
-                            <p className="text-slate-500 text-sm mt-3">Demo Mock Verifier</p>
+                            <div className="mt-4 inline-flex items-center glass px-4 py-1.5 rounded-full">
+                                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mr-2 animate-pulse"></div>
+                                <span className="text-xs text-slate-400 font-medium">Demo Mock Verifier</span>
+                            </div>
                         </div>
 
                         {/* Quick Login Section */}
                         <div className="space-y-3 mb-8">
-                            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-4">Quick Login</p>
+                            <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-4">Quick Login</p>
 
                             <button
                                 onClick={() => handleQuickLogin('john')}
-                                className="w-full group relative overflow-hidden rounded-xl p-4 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-blue-500/50 transition-all duration-300"
+                                className="w-full group relative overflow-hidden rounded-xl p-5 glass transition-all duration-300 hover:border-emerald-500/30"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div className="relative">
                                     <div className="flex items-center justify-between">
                                         <div className="text-left">
-                                            <p className="font-semibold text-white group-hover:text-blue-300 transition-colors">John Doe</p>
+                                            <p className="font-semibold text-slate-100 group-hover:text-emerald-400 transition-colors">John Doe</p>
                                             <p className="text-xs text-slate-500 mt-1">34 years • Can verify age</p>
                                         </div>
-                                        <div className="text-black group-hover:translate-x-1 transition-transform">→</div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                            <span className="text-emerald-400/50 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all">→</span>
+                                        </div>
                                     </div>
                                 </div>
                             </button>
 
                             <button
                                 onClick={() => handleQuickLogin('jane')}
-                                className="w-full group relative overflow-hidden rounded-xl p-4 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-purple-500/50 transition-all duration-300"
+                                className="w-full group relative overflow-hidden rounded-xl p-5 glass transition-all duration-300 hover:border-cyan-500/30"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div className="relative">
                                     <div className="flex items-center justify-between">
                                         <div className="text-left">
-                                            <p className="font-semibold text-white group-hover:text-purple-300 transition-colors">Jane Smith</p>
+                                            <p className="font-semibold text-slate-100 group-hover:text-cyan-400 transition-colors">Jane Smith</p>
                                             <p className="text-xs text-slate-500 mt-1">14 years • Student status</p>
                                         </div>
-                                        <div className="text-black group-hover:translate-x-1 transition-transform">→</div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
+                                            <span className="text-cyan-400/50 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all">→</span>
+                                        </div>
                                     </div>
                                 </div>
                             </button>
@@ -238,32 +256,32 @@ export default function Login() {
         );
     }
 
+    // ═════════════════════════════════
     // DASHBOARD SCREEN
+    // ═════════════════════════════════
     if (currentUser && !activeVerification) {
         return (
-            <div className="min-h-screen bg-slate-950 text-white">
+            <div className="min-h-screen bg-veridia-bg text-white relative">
                 {/* Background */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute top-1/2 -left-40 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
-                </div>
+                <div className="orb w-80 h-80 bg-emerald-600/6 -top-32 -right-32 animate-float"></div>
+                <div className="orb w-96 h-96 bg-cyan-600/5 top-1/2 -left-48 animate-float-delayed"></div>
 
                 <div className="relative z-10">
                     {/* Header with logout */}
-                    <div className="border-b border-slate-800 bg-slate-950/50 backdrop-blur-sm sticky top-0 z-20">
+                    <div className="border-b border-emerald-500/10 bg-veridia-bg/80 backdrop-blur-xl sticky top-0 z-20">
                         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg">
+                                <div className="p-2 bg-gradient-to-br from-emerald-500 to-cyan-600 rounded-lg shadow-md">
                                     <ShieldCheck className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold">Prüfen Verifier</p>
-                                    <p className="text-xs text-slate-500">Mock Demo</p>
+                                    <p className="text-sm font-semibold text-gradient">Veridia Verifier</p>
+                                    <p className="text-xs text-slate-600">Mock Demo</p>
                                 </div>
                             </div>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-red-400 transition-colors text-sm"
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg glass text-slate-400 hover:text-red-400 transition-colors text-sm"
                             >
                                 <LogOut className="w-4 h-4" />
                                 Logout
@@ -275,8 +293,8 @@ export default function Login() {
                     <div className="max-w-6xl mx-auto px-4 py-12">
                         {/* Welcome section */}
                         <div className="mb-12">
-                            <h2 className="text-3xl font-bold mb-2">Welcome, {currentUser.name}</h2>
-                            <p className="text-slate-400">
+                            <h2 className="text-3xl font-bold mb-2 text-slate-100">Welcome, <span className="text-gradient">{currentUser.name}</span></h2>
+                            <p className="text-slate-500">
                                 Select a verification type to create a zero-knowledge proof. Your data stays private while you prove your attributes.
                             </p>
                         </div>
@@ -290,31 +308,33 @@ export default function Login() {
                                         key={verification.id}
                                         onClick={() => handleVerificationRequest(verification)}
                                         disabled={loading}
-                                        className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 p-6 text-left
-                                            bg-gradient-to-br ${verification.bgGradient} 
-                                            ${verification.borderColor}
-                                            hover:border-opacity-100 hover:shadow-lg hover:shadow-slate-600/20
+                                        className={`group relative overflow-hidden rounded-2xl border border-white/5 transition-all duration-300 p-6 text-left
+                                            bg-gradient-to-br ${verification.gradientFrom} ${verification.gradientTo} 
+                                            ${verification.borderHover}
+                                            hover:shadow-lg hover:shadow-emerald-500/5
                                             disabled:opacity-50 disabled:cursor-not-allowed
                                         `}
                                     >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                                         <div className="relative z-10">
                                             <div className="mb-4 flex items-center justify-between">
-                                                <div className={`p-3 bg-slate-900/50 rounded-lg group-hover:scale-110 transition-transform ${verification.badgeColor}`}>
-                                                    <IconComponent className="w-6 h-6" />
+                                                <div className={`p-3 ${verification.iconBg} rounded-xl group-hover:scale-110 transition-transform duration-300`}>
+                                                    <IconComponent className={`w-6 h-6 ${verification.iconColor}`} />
                                                 </div>
-                                                <div className="text-xs font-mono text-slate-500">01</div>
+                                                <div className="text-xs font-mono text-slate-700">
+                                                    {verification.id === 'age' ? '01' : verification.id === 'student' ? '02' : '03'}
+                                                </div>
                                             </div>
 
-                                            <h3 className="text-lg font-bold mb-2 group-hover:text-white transition-colors">
+                                            <h3 className="text-lg font-bold mb-2 text-slate-200 group-hover:text-white transition-colors">
                                                 {verification.label}
                                             </h3>
-                                            <p className="text-sm text-slate-400 mb-4">
+                                            <p className="text-sm text-slate-500 mb-4">
                                                 {verification.description}
                                             </p>
 
-                                            <div className="flex items-center gap-2 text-sm text-slate-500 group-hover:text-slate-300 transition-colors">
+                                            <div className="flex items-center gap-2 text-sm text-slate-600 group-hover:text-emerald-400 transition-colors">
                                                 <span>Request verification</span>
                                                 <span className="group-hover:translate-x-1 transition-transform">→</span>
                                             </div>
@@ -323,35 +343,34 @@ export default function Login() {
                                 );
                             })}
                         </div>
-
                     </div>
                 </div>
             </div>
         );
     }
 
+    // ═════════════════════════════════
     // QR CODE SCREEN
+    // ═════════════════════════════════
     if (proofRequest && !proofData) {
         return (
-            <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl"></div>
-                </div>
+            <div className="min-h-screen bg-veridia-bg text-white flex items-center justify-center p-4 relative overflow-hidden">
+                <div className="orb w-80 h-80 bg-emerald-600/8 -top-32 -right-32 animate-float"></div>
+                <div className="orb w-72 h-72 bg-cyan-600/6 -bottom-32 -left-32 animate-float-delayed"></div>
 
                 <div className="relative z-10 w-full max-w-2xl">
                     <div className="text-center mb-8">
-                        <h2 className="text-2xl font-bold mb-2">
+                        <h2 className="text-2xl font-bold mb-2 text-slate-100">
                             {verifications.find(v => v.id === activeVerification)?.label}
                         </h2>
-                        <p className="text-slate-400">
-                            Scan with your Prüfen wallet to submit your zero-knowledge proof
+                        <p className="text-slate-500">
+                            Scan with your Veridia wallet to submit your zero-knowledge proof
                         </p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-8 flex flex-col items-center">
+                    <div className="glass-glow rounded-3xl p-8 flex flex-col items-center">
                         {/* QR Code */}
-                        <div className="mb-8 p-6 bg-white rounded-2xl">
+                        <div className="mb-8 p-6 bg-white rounded-2xl shadow-lg">
                             {proofRequest && (
                                 <QRCodeSVG
                                     value={JSON.stringify(proofRequest)}
@@ -364,11 +383,11 @@ export default function Login() {
 
                         {/* Status info */}
                         <div className="text-center mb-6">
-                            <div className="flex items-center justify-center gap-2 text-blue-400 mb-4">
+                            <div className="flex items-center justify-center gap-2 text-emerald-400 mb-4">
                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>Waiting for proof submission...</span>
+                                <span className="font-medium">Waiting for proof submission...</span>
                             </div>
-                            <p className="text-sm text-slate-500 font-mono">
+                            <p className="text-sm text-slate-600 font-mono">
                                 ID: {proofRequest?.proof_request_id?.substring(0, 12)}...
                             </p>
                         </div>
@@ -380,75 +399,81 @@ export default function Login() {
                                 setProofRequest(null);
                                 setProofData(null);
                             }}
-                            className="mt-6 px-6 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm transition-colors"
+                            className="mt-6 px-6 py-2 rounded-lg glass text-slate-400 hover:text-white text-sm transition-all duration-300 hover:border-emerald-500/30"
                         >
                             Cancel
                         </button>
                     </div>
 
                     {/* Help text */}
-                    <p className="text-center text-xs text-slate-600 mt-8">
-                        This is a demo. In production, users would scan this with their Prüfen mobile wallet.
+                    <p className="text-center text-xs text-slate-700 mt-8">
+                        This is a demo. In production, users would scan this with their Veridia mobile wallet.
                     </p>
                 </div>
             </div>
         );
     }
 
+    // ═════════════════════════════════
     // RESULTS SCREEN
+    // ═════════════════════════════════
     if (proofData) {
         const isSuccess = proofData.result === 'PASS' || proofData.result === true;
         const verification = verifications.find(v => v.id === activeVerification);
 
         return (
-            <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl"></div>
-                </div>
+            <div className="min-h-screen bg-veridia-bg text-white flex items-center justify-center p-4 relative overflow-hidden">
+                <div className="orb w-80 h-80 bg-emerald-600/8 -top-32 -right-32 animate-float"></div>
+                <div className="orb w-72 h-72 bg-cyan-600/6 -bottom-32 -left-32 animate-float-delayed"></div>
 
                 <div className="relative z-10 w-full max-w-2xl">
                     {/* Result Card */}
-                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-12 text-center">
+                    <div className="glass-glow rounded-3xl p-12 text-center">
                         {/* Icon */}
                         <div className="mb-8 flex justify-center">
-                            <div className={`p-4 rounded-full ${isSuccess ? 'bg-emerald-500/20' : proofData.result === 'DENIED' ? 'bg-slate-500/20' : 'bg-red-500/20'}`}>
-                                {isSuccess ? (
-                                    <CheckCircle2 className="w-16 h-16 text-emerald-400" />
-                                ) : proofData.result === 'DENIED' ? (
-                                    <LogOut className="w-16 h-16 text-slate-400" />
-                                ) : (
-                                    <XCircle className="w-16 h-16 text-red-400" />
-                                )}
+                            <div className="relative">
+                                <div className={`absolute inset-0 rounded-full animate-ring-ping ${isSuccess ? 'bg-emerald-500/20' : proofData.result === 'DENIED' ? 'bg-slate-500/10' : 'bg-red-500/20'
+                                    }`}></div>
+                                <div className={`relative p-5 rounded-full ${isSuccess ? 'bg-emerald-500/15 border border-emerald-500/30' : proofData.result === 'DENIED' ? 'bg-slate-500/10 border border-slate-500/20' : 'bg-red-500/15 border border-red-500/30'
+                                    }`}>
+                                    {isSuccess ? (
+                                        <CheckCircle2 className="w-16 h-16 text-emerald-400" />
+                                    ) : proofData.result === 'DENIED' ? (
+                                        <LogOut className="w-16 h-16 text-slate-500" />
+                                    ) : (
+                                        <XCircle className="w-16 h-16 text-red-400" />
+                                    )}
+                                </div>
                             </div>
                         </div>
 
                         {/* Result text */}
-                        <h2 className={`text-4xl font-bold mb-4 ${isSuccess ? 'text-emerald-400' : proofData.result === 'DENIED' ? 'text-slate-400' : 'text-red-400'}`}>
+                        <h2 className={`text-4xl font-bold mb-4 ${isSuccess ? 'text-gradient' : proofData.result === 'DENIED' ? 'text-slate-400' : 'text-red-400'}`}>
                             {isSuccess ? 'VERIFIED' : proofData.result === 'DENIED' ? 'REQUEST DENIED' : 'NOT VERIFIED'}
                         </h2>
 
-                        <p className="text-slate-400 text-lg mb-6">
+                        <p className="text-slate-500 text-lg mb-6">
                             {verification?.label}
                         </p>
 
                         {/* Details */}
-                        <div className="bg-slate-900/50 rounded-xl p-6 mb-8 text-left text-sm">
+                        <div className="glass rounded-xl p-6 mb-8 text-left text-sm">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-slate-500 text-xs uppercase tracking-wide mb-1">User</p>
-                                    <p className="font-semibold">{currentUser.name}</p>
+                                    <p className="text-slate-600 text-xs uppercase tracking-wider mb-1">User</p>
+                                    <p className="font-semibold text-slate-200">{currentUser.name}</p>
                                 </div>
                                 <div>
-                                    <p className="text-slate-500 text-xs uppercase tracking-wide mb-1">Proof ID</p>
-                                    <p className="font-mono text-xs">{proofData?.proof_id?.substring(0, 16)}...</p>
+                                    <p className="text-slate-600 text-xs uppercase tracking-wider mb-1">Proof ID</p>
+                                    <p className="font-mono text-xs text-slate-400">{proofData?.proof_id?.substring(0, 16)}...</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Info message */}
-                        <p className="text-xs text-slate-500 mb-8">
-                            ✓ This proof was generated and verified using zero-knowledge cryptography
+                        <p className="text-xs text-slate-600 mb-8 flex items-center justify-center gap-1.5">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500/50" />
+                            This proof was generated and verified using zero-knowledge cryptography
                         </p>
 
                         {/* Buttons */}
@@ -459,13 +484,13 @@ export default function Login() {
                                     setProofRequest(null);
                                     setProofData(null);
                                 }}
-                                className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold transition-colors"
+                                className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-cyan-500 font-semibold transition-all duration-300 glow-emerald"
                             >
                                 Try Another
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="px-6 py-3 rounded-lg bg-slate-700 hover:bg-slate-600 font-semibold transition-colors"
+                                className="px-6 py-3 rounded-xl glass text-slate-300 hover:text-white font-semibold transition-all duration-300 hover:border-emerald-500/30"
                             >
                                 Logout
                             </button>

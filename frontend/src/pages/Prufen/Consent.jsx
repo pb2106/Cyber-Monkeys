@@ -61,8 +61,6 @@ export default function Consent() {
             });
 
             if (request.callback_url) {
-                // GUARD: If running on Cloudflare/remote but callback is localhost, SKIP IT.
-                // This prevents CORS errors from stale QR codes or default backend config.
                 const isLocalhostCallback = request.callback_url.includes('localhost') || request.callback_url.includes('127.0.0.1');
                 const isRemoteOrigin = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
@@ -96,33 +94,36 @@ export default function Consent() {
 
     if (showUserSelector) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-8 border border-slate-100">
-                    <h2 className="text-2xl font-bold text-slate-900 mb-2 text-center">Select Demo Persona</h2>
-                    <p className="text-slate-500 mb-6 text-center">Who are you acting as for this test?</p>
+            <div className="min-h-screen bg-veridia-bg flex items-center justify-center p-4 relative overflow-hidden">
+                <div className="orb w-72 h-72 bg-emerald-600/8 -top-20 -right-20 animate-float"></div>
+                <div className="orb w-64 h-64 bg-cyan-600/8 -bottom-20 -left-20 animate-float-delayed"></div>
+
+                <div className="glass-glow rounded-2xl max-w-md w-full p-8 relative z-10">
+                    <h2 className="text-2xl font-bold text-slate-100 mb-2 text-center">Select Demo Persona</h2>
+                    <p className="text-slate-400 mb-6 text-center text-sm">Who are you acting as for this test?</p>
                     <div className="space-y-3">
                         <button
                             onClick={() => selectUser({ id: 'usr_demo_adult', name: 'John Doe' })}
-                            className="w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-white hover:shadow-md transition-all group"
+                            className="w-full text-left p-4 glass rounded-xl hover:border-emerald-500/30 transition-all duration-300 group"
                         >
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-bold text-slate-900 group-hover:text-blue-600">John Doe (Adult)</p>
+                                    <p className="font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">John Doe (Adult)</p>
                                     <p className="text-sm text-slate-500">Age: 34 • Resident</p>
                                 </div>
-                                <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                                <div className="h-3 w-3 rounded-full bg-emerald-500 glow-emerald"></div>
                             </div>
                         </button>
                         <button
                             onClick={() => selectUser({ id: 'usr_demo_teen', name: 'Jane Smith' })}
-                            className="w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-white hover:shadow-md transition-all group"
+                            className="w-full text-left p-4 glass rounded-xl hover:border-cyan-500/30 transition-all duration-300 group"
                         >
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-bold text-slate-900 group-hover:text-blue-600">Jane Smith (Teen)</p>
+                                    <p className="font-bold text-slate-100 group-hover:text-cyan-400 transition-colors">Jane Smith (Teen)</p>
                                     <p className="text-sm text-slate-500">Age: 14 • Student</p>
                                 </div>
-                                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                                <div className="h-3 w-3 rounded-full bg-cyan-500 glow-cyan"></div>
                             </div>
                         </button>
                     </div>
@@ -133,14 +134,14 @@ export default function Consent() {
 
     if (error && !request) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-8 text-center border border-slate-100">
-                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <XCircle className="w-8 h-8 text-red-500" />
+            <div className="min-h-screen bg-veridia-bg flex items-center justify-center p-4">
+                <div className="glass-glow rounded-2xl max-w-md w-full p-8 text-center">
+                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                        <XCircle className="w-8 h-8 text-red-400" />
                     </div>
-                    <h1 className="text-xl font-bold text-slate-900 mb-2">Request Not Found</h1>
-                    <p className="text-slate-500 mb-8">{error}</p>
-                    <button onClick={() => navigate('/')} className="bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors">
+                    <h1 className="text-xl font-bold text-slate-100 mb-2">Request Not Found</h1>
+                    <p className="text-slate-400 mb-8">{error}</p>
+                    <button onClick={() => navigate('/')} className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-6 py-3 rounded-xl font-medium hover:from-emerald-500 hover:to-cyan-500 transition-all duration-300">
                         Return Home
                     </button>
                 </div>
@@ -150,8 +151,8 @@ export default function Consent() {
 
     if (!request) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-slate-900"></div>
+            <div className="min-h-screen bg-veridia-bg flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500/20 border-t-emerald-500"></div>
             </div>
         );
     }
@@ -170,46 +171,49 @@ export default function Consent() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
-            <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full overflow-hidden relative">
+        <div className="min-h-screen bg-veridia-bg flex items-center justify-center p-4 font-sans relative overflow-hidden">
+            <div className="orb w-72 h-72 bg-emerald-600/8 -top-20 right-10 animate-float"></div>
+            <div className="orb w-56 h-56 bg-cyan-600/6 bottom-10 -left-10 animate-float-slow"></div>
+
+            <div className="glass-glow rounded-2xl max-w-md w-full overflow-hidden relative z-10">
                 {/* User Badge */}
                 {currentUser && (
                     <div className="absolute top-4 right-4 z-10">
                         <button
                             onClick={() => setShowUserSelector(true)}
-                            className="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 transition-colors"
+                            className="flex items-center space-x-2 glass px-3 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-emerald-400 transition-colors"
                         >
-                            <div className={`w-2 h-2 rounded-full ${currentUser.id === 'usr_demo_adult' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                            <div className={`w-2 h-2 rounded-full ${currentUser.id === 'usr_demo_adult' ? 'bg-emerald-500' : 'bg-cyan-500'}`}></div>
                             <span>{currentUser.name}</span>
                         </button>
                     </div>
                 )}
 
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100">
+                <div className="p-6 border-b border-emerald-500/10">
                     <div className="flex items-center justify-between mb-6">
-                        <button onClick={handleDecline} className="text-slate-400 hover:text-slate-600">
+                        <button onClick={handleDecline} className="text-slate-500 hover:text-slate-300 transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </button>
-                        <div className="flex items-center text-slate-900 font-bold">
-                            <ShieldCheck className="w-5 h-5 mr-2 text-slate-900" />
-                            Prüfen
+                        <div className="flex items-center text-emerald-400 font-bold">
+                            <ShieldCheck className="w-5 h-5 mr-2" />
+                            Veridia
                         </div>
                         <div className="w-5"></div>
                     </div>
                     <div className="text-center">
-                        <h1 className="text-xl font-bold text-slate-900 mb-1">Verification Request</h1>
-                        <p className="text-sm text-slate-500">
-                            <span className="font-semibold text-slate-900">{request.verifier?.name || request.verifier_name}</span> is requesting proof.
+                        <h1 className="text-xl font-bold text-slate-100 mb-1">Verification Request</h1>
+                        <p className="text-sm text-slate-400">
+                            <span className="font-semibold text-emerald-400">{request.verifier?.name || request.verifier_name}</span> is requesting proof.
                         </p>
                     </div>
                 </div>
 
                 <div className="p-6">
                     {/* Claim Display */}
-                    <div className="bg-slate-50 rounded-xl p-6 text-center mb-6 border border-slate-100">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">They want to verify</p>
-                        <p className="text-lg font-medium text-slate-900">
+                    <div className="glass rounded-xl p-6 text-center mb-6">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">They want to verify</p>
+                        <p className="text-lg font-medium text-gradient">
                             {isStudent ? 'Student Status' : isResidency ? 'US Residency' : claimDisplay}
                         </p>
                     </div>
@@ -218,19 +222,19 @@ export default function Consent() {
                     <div className="space-y-4 mb-8">
                         <div className="flex items-start">
                             <div className="flex-shrink-0 mt-0.5">
-                                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                             </div>
                             <div className="ml-3">
-                                <p className="text-sm font-semibold text-slate-900">They will receive</p>
+                                <p className="text-sm font-semibold text-slate-200">They will receive</p>
                                 <p className="text-xs text-slate-500 mt-0.5">A simple YES or NO confirmation only.</p>
                             </div>
                         </div>
                         <div className="flex items-start">
                             <div className="flex-shrink-0 mt-0.5">
-                                <XCircle className="w-5 h-5 text-slate-300" />
+                                <XCircle className="w-5 h-5 text-slate-600" />
                             </div>
                             <div className="ml-3">
-                                <p className="text-sm font-semibold text-slate-900">They will NOT see</p>
+                                <p className="text-sm font-semibold text-slate-200">They will NOT see</p>
                                 <p className="text-xs text-slate-500 mt-0.5">Your private details or raw ID data.</p>
                             </div>
                         </div>
@@ -238,22 +242,22 @@ export default function Consent() {
 
                     {/* Meta Info */}
                     <div className="grid grid-cols-3 gap-2 mb-8">
-                        <div className="flex flex-col items-center text-center p-2">
-                            <Clock className="w-4 h-4 text-slate-400 mb-1" />
+                        <div className="flex flex-col items-center text-center p-3 glass rounded-lg">
+                            <Clock className="w-4 h-4 text-emerald-400/60 mb-1" />
                             <span className="text-[10px] text-slate-500">Expires in 5m</span>
                         </div>
-                        <div className="flex flex-col items-center text-center p-2">
-                            <Trash2 className="w-4 h-4 text-slate-400 mb-1" />
+                        <div className="flex flex-col items-center text-center p-3 glass rounded-lg">
+                            <Trash2 className="w-4 h-4 text-emerald-400/60 mb-1" />
                             <span className="text-[10px] text-slate-500">Deleted after use</span>
                         </div>
-                        <div className="flex flex-col items-center text-center p-2">
-                            <Lock className="w-4 h-4 text-slate-400 mb-1" />
+                        <div className="flex flex-col items-center text-center p-3 glass rounded-lg">
+                            <Lock className="w-4 h-4 text-emerald-400/60 mb-1" />
                             <span className="text-[10px] text-slate-500">Single verifier</span>
                         </div>
                     </div>
 
                     {error && (
-                        <div className="mb-6 bg-red-50 border border-red-100 text-red-600 p-3 rounded-lg text-sm flex items-center">
+                        <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl text-sm flex items-center">
                             <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
                             {error}
                         </div>
@@ -262,7 +266,7 @@ export default function Consent() {
                     <button
                         onClick={handleApprove}
                         disabled={loading}
-                        className="w-full bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-xl font-bold mb-3 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-md active:scale-[0.98]"
+                        className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-cyan-500 text-white p-4 rounded-xl font-bold mb-3 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 shadow-lg glow-emerald active:scale-[0.98]"
                     >
                         {loading ? (
                             <span className="flex items-center justify-center">
@@ -273,13 +277,13 @@ export default function Consent() {
                             'Approve Verification'
                         )}
                     </button>
-                    <button onClick={handleDecline} className="w-full text-slate-500 hover:text-slate-700 p-3 font-medium text-sm transition-colors">
+                    <button onClick={handleDecline} className="w-full text-slate-500 hover:text-red-400 p-3 font-medium text-sm transition-colors">
                         Decline Request
                     </button>
                 </div>
-                <div className="bg-slate-50 p-4 text-center border-t border-slate-100">
-                    <p className="text-[10px] text-slate-400 flex items-center justify-center">
-                        <Lock className="w-3 h-3 mr-1" />
+                <div className="border-t border-emerald-500/10 p-4 text-center bg-veridia-bg/50">
+                    <p className="text-[10px] text-slate-600 flex items-center justify-center">
+                        <Lock className="w-3 h-3 mr-1 text-emerald-500/30" />
                         Zero-Knowledge Proof Protocol
                     </p>
                 </div>
