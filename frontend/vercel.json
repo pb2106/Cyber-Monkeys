@@ -5,7 +5,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "https://cyber-monkeys.onrender.com/$1"
+            "destination": "https://cyber-monkeys.onrender.com/api/$1"
         },
         {
             "source": "/(.*)",
