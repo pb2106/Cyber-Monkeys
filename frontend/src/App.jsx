@@ -7,7 +7,7 @@ import Consent from './pages/Prufen/Consent'
 import Success from './pages/Prufen/Success'
 
 // Mock Verifier App Pages
-import Login from './pages/MockVerifier/Login'
+import Login from './pages/Prufen/Login'
 
 function App() {
     return (
@@ -20,7 +20,7 @@ function App() {
 
             {/* Mock Verifier App - All in one unified interface */}
             <Route path="/mock-verifier" element={<Navigate to="/mock-verifier/login" replace />} />
-            <Route path="/mock-verified/login" element={<Login />} />
+            <Route path="/mock-verifier/login" element={<Login />} />
         </Routes>
     )
 }

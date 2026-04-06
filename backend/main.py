@@ -2,6 +2,8 @@
 Prüfen - Privacy-Preserving Attribute Verification Platform
 FastAPI Backend
 """
+import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
@@ -14,14 +16,62 @@ from routers import (
     admin_router
 )
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Startup/shutdown lifecycle for the app.
+    On startup: create tables, generate RSA keys, and seed database.
+    """
+    # --- Startup ---
+    print("🚀 Running startup initialization...")
+
+    # 1. Create database tables
+    Base.metadata.create_all(bind=engine)
+    print("✅ Database tables created.")
+
+    # 2. Generate RSA keys if they don't exist
+    import crypto_utils
+    keys_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "keys")
+    private_key_path = os.path.join(keys_dir, "private_key.pem")
+    if not os.path.exists(private_key_path):
+        print("🔐 First run detected — generating RSA key pair...")
+        crypto_utils.generate_rsa_keypair(
+            private_key_path=os.path.join(keys_dir, "private_key.pem"),
+            public_key_path=os.path.join(keys_dir, "public_key.pem")
+        )
+    else:
+        print("🔑 RSA keys already exist, skipping generation.")
+
+    # 3. Seed database if empty (first run)
+    from database import SessionLocal
+    db = SessionLocal()
+    try:
+        verifier_count = db.query(models.Verifier).count()
+    finally:
+        db.close()
+
+    if verifier_count == 0:
+        print("🌱 First run detected — seeding database...")
+        from seed_data import seed_database
+        seed_database()
+    else:
+        print(f"📦 Database already has {verifier_count} verifier(s), skipping seed.")
+
+    print("✅ Startup complete!")
+
+    yield  # app runs here
+
+    # --- Shutdown ---
+    print("👋 Shutting down Prüfen API.")
+
 
 # Initialize FastAPI app
 app = FastAPI(
     title="Prüfen API",
     description="Privacy-preserving attribute verification platform",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS middleware
