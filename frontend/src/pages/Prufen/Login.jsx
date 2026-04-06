@@ -47,7 +47,7 @@ export default function Login() {
             id: 'residency',
             label: 'Residency Verification',
             condition: 'residency_US',
-            description: 'Verify US residency',
+            description: 'Verify residency',
             icon: MapPin,
             accentColor: 'teal',
             gradientFrom: 'from-teal-600/15',
